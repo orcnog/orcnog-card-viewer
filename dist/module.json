@@ -1,0 +1,35 @@
+{
+  "name": "card-viewer",
+  "id": "card-viewer",
+  "title": "card-viewer",
+  "description": "",
+  "systems": [],
+  "version": "0.1.0",
+  "manifest": "",
+  "download": "",
+  "url": "",
+  "license": "",
+  "readme": "",
+  "bugs": "",
+  "changelog": "",
+  "author": "orcnog",
+  "scripts": [],
+  "esmodules": [
+    "init.js"
+  ],
+  "styles": ["card-viewer.css"],
+  "packs": [],
+  "languages": [],
+  "socket": true,
+  "dependencies": [
+    {
+      "name": "socketlib",
+      "manifest": "https://github.com/League-of-Foundry-Developers/socketlib/releases/latest/download/module.json"
+    }
+  ],
+  "minimumCoreVersion": "0.5.0",
+  "compatibility": {
+    "minimum": "10.275",
+    "verified": "10.291"
+  }
+}
