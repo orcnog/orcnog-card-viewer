@@ -58,7 +58,7 @@ export default function registerHooks() {
         console.log('card-viewer: initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.createFancyImageViewer = function ({ front, back, border, showBackFirst, share }) {
+        globalThis.FancyImageViewer = function ({ front, back, border, showBackFirst, share }) {
             return new FancyDisplay(front, back, border, showBackFirst, share);
         };
 
@@ -86,4 +86,20 @@ export default function registerHooks() {
     // });
 }
 
+//TODO: Test with big and huge images.
+
 //TODO: Add a "Share" button to the fancy floaty display if share was false
+
+//TODO: Set a default card back image if none is provided but display is definitely in a "card" context.
+
+//TODO: Add macros to the module. Add macro icons to /assets
+
+//TODO: Add a click handler to cards in the CardConfig application: on click, launch the FancyDisplay of the card (with option to share)
+
+//TODO: Stretch goal - set up a module setting to let the user choose the default card back image? Include ability to define a URL.
+
+//TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
+
+//TODO: Stretch goal - add functionality to display image with frayed / torn / rough edges.
+
+//TODO: Stretch goal - add ability to rotate the displayed image.
