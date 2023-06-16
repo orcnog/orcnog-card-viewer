@@ -1,19 +1,19 @@
 class FancyDisplay {
-    constructor(imgFrontPath, imgBackPath, border, faceDown, share) {
+    constructor(imgFrontPath, imgBackPath, border, faceDown) {
         this.imgFrontPath = imgFrontPath;
         this.imgBackPath = imgBackPath;
         this.border = border;
         this.faceDown = faceDown;
-        this.share = share;
     }
 
-    async render() {
+    async render(shareToAll) {
         try {
             // Specify the image URL or file path
             const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
             const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
             const borderColor = this.border;
             const FancyDisplay = this;
+            const share = shareToAll;
 
             if (imgFrontPath) {
                 // Calculate the canvas viewable area
@@ -175,7 +175,7 @@ class FancyDisplay {
                 customPopout.render(true);
 
                 // Check if the user is the GM
-                if (this.share && game.user.isGM) {
+                if (share && game.user.isGM) {
                     // Emit a socket message to all players
                     game.socket.emit('module.card-viewer', {
                         type: 'VIEWCARD',
@@ -184,7 +184,7 @@ class FancyDisplay {
                             imgBackPath: this.imgBackPath,
                             border: this.border,
                             faceDown: this.faceDown,
-                            share: this.share
+                            shareToAll: share
                         }
                     });
                 }

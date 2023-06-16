@@ -69,10 +69,10 @@ class CardDealer {
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
             // Extract card properties
-            const { name, front, back, desc, border, faceDown, share } = this._extractCardProperties(drawnCard);
+            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(drawnCard);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown, share).render();
+            new FancyDisplay(front, back, border, faceDown).render(true);
 
             // Whisper the card instructions to the DM
             this._whisperCardInstructions(name, front, desc);
@@ -99,10 +99,10 @@ class CardDealer {
             }
 
             // Extract card properties
-            const { name, front, back, desc, border, faceDown, share } = this._extractCardProperties(card);
+            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(card);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown, share).render();
+            new FancyDisplay(front, back, border, faceDown).render(true);
 
             // Whisper the card instructions to the DM
             this._whisperCardInstructions(name, front, desc);
@@ -140,9 +140,8 @@ class CardDealer {
         const desc = card.faces[0].text;
         const border = '#d29a38';
         const faceDown = true;
-        const share = true;
 
-        return { name, front, back, desc, border, faceDown, share };
+        return { name, front, back, desc, border, faceDown };
     }
 
     _whisperCardInstructions(name, front, desc) {

@@ -40,14 +40,14 @@ export default function registerHooks() {
                 new CardDealer(deckName).view(cardName);
             },
             viewImage: function (image, share) {
-                new FancyDisplay(image, share).render();
+                new FancyDisplay(image).render(share);
             },
             viewImageAsCard: function (image, share) {
-                new FancyDisplay(image, 'modules/card-viewer/assets/orcnogback.webp', '#da6', true, share).render();
+                new FancyDisplay(image, 'modules/card-viewer/assets/orcnogback.webp', '#da6', true).render(share);
             },
             // expose the class itself
-            FancyDisplay: function ({ front, back = 'modules/card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true, share }) { // #d29a38
-                return new FancyDisplay(front, back, border, faceDown, share);
+            FancyDisplay: function ({ front, back = 'modules/card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) { // #d29a38
+                return new FancyDisplay(front, back, border, faceDown);
             }
         };
     });
@@ -86,8 +86,6 @@ export default function registerHooks() {
     //    console.log(...args);
     // });
 }
-
-//TODO: move the 'share' param to the render() method.
 
 //TODO: make the FancyDisplay constructor take a config object, rather than multiple params in order
 
