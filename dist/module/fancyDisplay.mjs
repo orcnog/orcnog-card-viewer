@@ -1,17 +1,17 @@
 class FancyDisplay {
-    constructor(imgFrontPath, imgBackPath, border, showBackFirst, share) {
+    constructor(imgFrontPath, imgBackPath, border, faceDown, share) {
         this.imgFrontPath = imgFrontPath;
         this.imgBackPath = imgBackPath;
         this.border = border;
-        this.showBackFirst = showBackFirst;
+        this.faceDown = faceDown;
         this.share = share;
     }
 
     async render() {
         try {
             // Specify the image URL or file path
-            const imgFrontPath = this.showBackFirst ? this.imgBackPath : this.imgFrontPath;
-            const imgBackPath = this.showBackFirst ? this.imgFrontPath : this.imgBackPath;
+            const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
+            const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
             const borderColor = this.border;
             const FancyDisplay = this;
 
@@ -183,7 +183,7 @@ class FancyDisplay {
                             imgFrontPath: this.imgFrontPath,
                             imgBackPath: this.imgBackPath,
                             border: this.border,
-                            showBackFirst: this.showBackFirst,
+                            faceDown: this.faceDown,
                             share: this.share
                         }
                     });
@@ -198,6 +198,7 @@ class FancyDisplay {
     }
 
     _adjustToGlintColor (color) {
+        if (!color) return null;
         const Y = 58; // yellow
         const [H, S, L] = this._convertHexToHSL(color);
         // const newH = (H + Y) / 2;

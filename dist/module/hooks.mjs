@@ -42,11 +42,12 @@ export default function registerHooks() {
             viewImage: function (image, share) {
                 new FancyDisplay(image, share).render();
             },
-            FancyDisplay: function ({ image, share}) {
-                return new FancyDisplay(image, null, null, null, share);
+            viewImageAsCard: function (image, share) {
+                new FancyDisplay(image, 'modules/card-viewer/assets/orcnogback.webp', '#da6', true, share).render();
             },
-            FancyCardDisplay: function ({ front, back = 'modules/card-viewer/assets/blackfloralback.webp', border = '#d29a38', showBackFirst = true, share }) {
-                return new FancyDisplay(front, back, border, showBackFirst, share);
+            // expose the class itself
+            FancyDisplay: function ({ front, back = 'modules/card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true, share }) { // #d29a38
+                return new FancyDisplay(front, back, border, faceDown, share);
             }
         };
     });
@@ -58,14 +59,14 @@ export default function registerHooks() {
         console.log('card-viewer: initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.FancyImageViewer = function ({ front, back, border, showBackFirst, share }) {
-            return new FancyDisplay(front, back, border, showBackFirst, share);
+        globalThis.FancyImageViewer = function ({ front, back, border, faceDown, share }) {
+            return new FancyDisplay(front, back, border, faceDown, share);
         };
 
         function handleCardViewerSocketEvent({ type, payload }) {
             switch (type) {
                 case 'VIEWCARD': {
-                    const cardView = new FancyDisplay(payload.imgFrontPath, payload.imgBackPath, payload.border, payload.showBackFirst, payload.share);
+                    const cardView = new FancyDisplay(payload.imgFrontPath, payload.imgBackPath, payload.border, payload.faceDown, payload.share);
                     cardView.render();
                 }
                 default:
@@ -86,7 +87,9 @@ export default function registerHooks() {
     // });
 }
 
-//TODO: Test with big and huge images.
+//TODO: move the 'share' param to the render() method.
+
+//TODO: make the FancyDisplay constructor take a config object, rather than multiple params in order
 
 //TODO: Add a "Share" button to the fancy floaty display if share was false
 
