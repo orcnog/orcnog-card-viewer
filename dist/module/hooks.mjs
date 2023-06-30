@@ -40,8 +40,8 @@ export default function registerHooks() {
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardName, true);`
-            view: function (deckName, cardName, share) {
-                new CardDealer(deckName).view(cardName, share);
+            view: function (deckName, card, share) {
+                new CardDealer(deckName).view(card, share);
             },
             // View an image (no border, can't flip)
             // Example: `game.modules.get('orcnog-card-viewer').api.viewImage(imgPath, true);`
@@ -119,6 +119,7 @@ export default function registerHooks() {
     // });
 }
 
+//TOFIX: don't create new discard pile if we're just viewing a card. adjust Fancy Card Viewer macro so a discard pile name isn't included.
 //TODO: make the FancyDisplay constructor take a config object, rather than multiple params in order
 
 //TODO: Add a "Share" button to the fancy floaty display if share was false

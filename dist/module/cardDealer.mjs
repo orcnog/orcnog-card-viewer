@@ -32,25 +32,7 @@ class CardDealer {
         }
 
         this.deck = deck;
-
-        // Get the discard pile by name, or smart detect a discard pile's existence and get that, or create a new one.
-        let pileName = discardPileName;
-        let pile = game.cards.getName(pileName);
-        if (!pile) {
-            // No pile found, but if the user did provide a name, go ahead and make a new pile with that name.
-            if (discardPileName) {
-                pile = await Cards.create({ name: discardPileName, type: "pile" });
-            } else {
-                // No discard pile name provided. Lookup piles and try to smart-match.
-                const matchedPileName = this._smartMatchDiscardName(deckName);
-                pile = game.cards.getName(matchedPileName);
-                if (pile && discardPileName) ui.notifications.warn(`Found a discard pile named "${matchedPileName}" which will be used.`);
-            }
-            // No match found. Create a new pile.
-            if (!pile) pile = await Cards.create({ name: deckName + " - Discard Pile", type: "pile" });
-        }
-
-        this.pile = pile;
+        this.pile = await this._getDiscardPile(discardPileName); // may return null. at this point a discard pile is not mandatory though.
 
         // Resolve the initialization promise to indicate completion
         this.initPromiseResolve();
@@ -62,8 +44,13 @@ class CardDealer {
 
             const deckName = this.deckName;
             const deck = this.deck;
-            const pile = this.pile;
             const shareToAll = share;
+
+            // At this point, it is mandatory that we have a discard pile.
+            // If there's not already a discard pile assigned to THIS, try to match an existing discard pile by name, or just create a new one.
+            this.pile = this.pile || _createNewDiscardPile();
+
+            const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
             await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM });
@@ -83,25 +70,31 @@ class CardDealer {
         }
     }
 
-    async view(cardName, share) {
+    /**
+     * View a card (but do not draw it)
+     * @param {string} card This can be the card ID or the card's exact name.
+     * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
+     * @returns 
+     */
+    async view(card, share) {
         try {
             const deck = this.deck;
             const shareToAll = share;
 
-            if (!cardName) {
-                ui.notifications.warn("Card name not provided.");
+            if (!card) {
+                ui.notifications.warn("Please provide a card name or ID.");
                 return;
             }
 
             // Get card by name
-            const card = deck.cards.getName(cardName);
-            if (!card) {
-                ui.notifications.warn("No card by that name was found.");
+            const cardToView = deck.cards.get(card) || deck.cards.getName(card);
+            if (!cardToView) {
+                ui.notifications.warn("No card by that ID or name was found.");
                 return;
             }
 
             // Extract card properties
-            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(card);
+            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(cardToView);
 
             // Display with fancy card viewer module
             new FancyDisplay(front, back, border, faceDown).render(shareToAll);
@@ -112,6 +105,33 @@ class CardDealer {
         } catch (error) {
             console.error("Error rendering CardView.view():", error);
         }
+    }
+
+    // Get the discard pile by name, or smart detect a discard pile's existence and get that, or create a new one.
+    async _getDiscardPile(discardPileName) {
+        let pile;
+        if (!discardPileName) {
+            // If no name provided, then lookup piles and try to smart-match by deck name.
+            const matchedPileName = this._smartMatchDiscardName(this.deckName);
+            pile = game.cards.getName(matchedPileName);
+            if (pile) ui.notifications.warn(`No discard pile name provided. Found a discard pile named "${matchedPileName}", which will be used.`);
+        } else {
+            // Try to get an existing discard pile by the name provided
+            pile = game.cards.getName(discardPileName);
+            // If that didn't work, create a new discard pile by the name provided.
+            if (!pile) {
+                ui.notifications.warn(`No pile found by the name "${discardPileName}". Creating a new discard pile by that name.`);
+                pile = await Cards.create({ name: discardPileName, type: "pile" });
+            }
+        }
+        return pile;
+    }
+
+    // Create a new discard pile by deck name.
+    async _createNewDiscardPile(discardPileName) {
+        const newPileName = discardPileName || `${this.deckName} - Discard Pile`;
+        const pile = this.pile || await Cards.create({ name: newPileName, type: "pile" });
+        return pile;
     }
 
     _smartMatchDiscardName(name) {
