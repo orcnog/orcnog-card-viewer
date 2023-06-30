@@ -1,87 +1,87 @@
-.card-viewer {
+.orcnog-card-viewer {
     height: 100%;
     width: 100%;
     position: relative;
 }
 
-.card-viewer img {
+.orcnog-card-viewer img {
     border: 0;
 }
 
-.card-viewer * {
+.orcnog-card-viewer * {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 
-.card-viewer :after,
-.card-viewer :before {
+.orcnog-card-viewer :after,
+.orcnog-card-viewer :before {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 
-.card-viewer img {
+.orcnog-card-viewer img {
     vertical-align: middle;
 }
 
-.card-viewer * {
+.orcnog-card-viewer * {
     scrollbar-width: thin;
 }
 
-.card-viewer ::-webkit-scrollbar {
+.orcnog-card-viewer ::-webkit-scrollbar {
     width: 9px;
     height: 9px;
 }
 
-.card-viewer ::-webkit-scrollbar-track {
+.orcnog-card-viewer ::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.card-viewer ::-webkit-scrollbar-thumb {
+.orcnog-card-viewer ::-webkit-scrollbar-thumb {
     background: #475b6b;
 }
 
-.card-viewer .no-events {
+.orcnog-card-viewer .no-events {
     pointer-events: none !important;
 }
 
-.card-viewer .no-select {
+.orcnog-card-viewer .no-select {
     user-select: none !important;
 }
 
-.card-viewer .relative {
+.orcnog-card-viewer .relative {
     position: relative !important;
 }
 
-.card-viewer .absolute {
+.orcnog-card-viewer .absolute {
     position: absolute !important;
 }
 
-.card-viewer .ve-flex-col {
+.orcnog-card-viewer .ve-flex-col {
     display: flex !important;
     flex-direction: column !important;
 }
 
-.card-viewer .ve-flex-v-center {
+.orcnog-card-viewer .ve-flex-v-center {
     display: flex !important;
     align-items: center !important;
 }
 
-.card-viewer .ve-flex-vh-center {
+.orcnog-card-viewer .ve-flex-vh-center {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
 @media only screen and (max-width: 768px) {
-    .card-viewer .mobile__ve-flex-col {
+    .orcnog-card-viewer .mobile__ve-flex-col {
         display: flex !important;
         flex-direction: column !important;
     }
 }
 
-.card-viewer .decks-draw__stg {
+.orcnog-card-viewer .decks-draw__stg {
     position: fixed;
     position: relative;
     z-index: 200;
@@ -95,18 +95,18 @@
     height: 100%;
 }
 
-.card-viewer .decks-draw__stg--visible {
-    box-shadow: inset 0 0 100vh 100vh rgba(0, 0, 0, 0.566666667);
+.orcnog-card-viewer .decks-draw__stg--visible {
+    box-shadow: inset 0 0 100vh 100vh rgba(0, 0, 0, 0.77);
     transition: box-shadow 500ms;
 }
 
-.card-viewer .decks-draw__wrp-sparkle-sway {
+.orcnog-card-viewer .decks-draw__wrp-sparkle-sway {
     animation-name: anim-sway;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
-.card-viewer .decks-draw__img-sparkle {
+.orcnog-card-viewer .decks-draw__img-sparkle {
     max-width: 67%;
     max-height: 67%;
     top: -25%;
@@ -117,12 +117,12 @@
     animation-iteration-count: infinite, infinite;
 }
 
-.card-viewer .decks-draw__img-sparkle--visible {
+.orcnog-card-viewer .decks-draw__img-sparkle--visible {
     opacity: 1;
     transition: opacity 250ms;
 }
 
-.card-viewer .decks-draw__wrp-card {
+.orcnog-card-viewer .decks-draw__wrp-card {
     padding: 0;
     border-radius: 1rem;
     scale: 0;
@@ -131,15 +131,15 @@
     color: rgba(255, 255, 255, 0.53);
 }
 
-.card-viewer.has-border .decks-draw__wrp-card {
+.orcnog-card-viewer.has-border .decks-draw__wrp-card {
     padding: 1rem;
 }
 
-.card-viewer .decks-draw__wrp-card:hover {
+.orcnog-card-viewer .decks-draw__wrp-card:hover {
     cursor: none;
 }
 
-.card-viewer .decks-draw__wrp-card--visible {
+.orcnog-card-viewer .decks-draw__wrp-card--visible {
     animation-name: anim-card-pop-in;
     animation-duration: 335ms;
     animation-timing-function: ease-in-out;
@@ -147,13 +147,13 @@
     scale: 1;
 }
 
-.card-viewer .decks-draw__img-card {
+.orcnog-card-viewer .decks-draw__img-card {
     z-index: 0;
     max-height: 50vh;
     max-width: 60vw;
 }
 
-.card-viewer .decks-draw__img-card-back {
+.orcnog-card-viewer .decks-draw__img-card-back {
     z-index: -1;
     width: 100%;
     height: 100%;
@@ -161,23 +161,23 @@
     transition: z-index 750ms;
 }
 
-.card-viewer.has-border .decks-draw__img-card-back {
+.orcnog-card-viewer.has-border .decks-draw__img-card-back {
     width: calc(100% - 2rem);
     height: calc(100% - 2rem);
 }
 
-.card-viewer .decks-draw__wrp-card-sway {
+.orcnog-card-viewer .decks-draw__wrp-card-sway {
     animation-name: anim-sway;
     animation-duration: 7s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
-.card-viewer .decks-draw__wrp-card-flip {
+.orcnog-card-viewer .decks-draw__wrp-card-flip {
     transition: transform 750ms;
 }
 
-.card-viewer .decks-draw__disp-glint {
+.orcnog-card-viewer .decks-draw__disp-glint {
     z-index: 2;
     top: 0;
     right: 0;
@@ -187,16 +187,16 @@
     transition: transform 750ms;
 }
 
-.card-viewer .decks-draw__wrp-card-flip--flipped {
+.orcnog-card-viewer .decks-draw__wrp-card-flip--flipped {
     transform: rotateY(180deg);
     transition: transform 750ms;
 }
 
-.card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__img-card-back {
+.orcnog-card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__img-card-back {
     z-index: 0;
 }
 
-.card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__disp-glint {
+.orcnog-card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__disp-glint {
     transform: rotateY(180deg);
 }
 

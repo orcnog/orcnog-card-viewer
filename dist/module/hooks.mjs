@@ -32,22 +32,36 @@ export default function registerHooks() {
     /* ------------------------------------ */
     Hooks.once('setup', function () {
         // Do anything after initialization but before ready
-        game.modules.get('card-viewer').api = {
-            draw: function (deckName, discardPileName) {
-                new CardDealer(deckName, discardPileName).draw();
+        game.modules.get('orcnog-card-viewer').api = {
+            // Draw a card
+            // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true);`
+            draw: function (deckName, discardPileName, share) {
+                new CardDealer(deckName, discardPileName).draw(share);
             },
-            view: function (deckName, cardName) {
-                new CardDealer(deckName).view(cardName);
+            // View a card
+            // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardName, true);`
+            view: function (deckName, cardName, share) {
+                new CardDealer(deckName).view(cardName, share);
             },
+            // View an image (no border, can't flip)
+            // Example: `game.modules.get('orcnog-card-viewer').api.viewImage(imgPath, true);`
             viewImage: function (image, share) {
                 new FancyDisplay(image).render(share);
             },
+            // View any image like a card
+            // Example: `game.modules.get('orcnog-card-viewer').api.viewImageAsCard(imgPath, true);`
             viewImageAsCard: function (image, share) {
-                new FancyDisplay(image, 'modules/card-viewer/assets/orcnogback.webp', '#da6', true).render(share);
+                new FancyDisplay(image, 'modules/orcnog-card-viewer/assets/orcnogback.webp', '#da6', true).render(share);
             },
-            // expose the class itself
-            FancyDisplay: function ({ front, back = 'modules/card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) { // #d29a38
+            // Create a FancyDisplay instance and expose the whole thing
+            // Example: `const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({ front: imgPath });`
+            FancyDisplay: function ({ front, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) { // #d29a38
                 return new FancyDisplay(front, back, border, faceDown);
+            },
+            // Create a CardDealer instance and expose the whole thing
+            // Example: `const myFancyDealer = await game.modules.get('orcnog-card-viewer').api.CardDealer({ deckName: 'My Deck' });`
+            CardDealer: function ({ deckName, discardPileName }) {
+                return new CardDealer(deckName, discardPileName);
             }
         };
     });
@@ -56,11 +70,21 @@ export default function registerHooks() {
     /* When ready                           */
     /* ------------------------------------ */
     Hooks.once('ready', function () {
-        console.log('card-viewer: initializing');
+        console.log('orcnog-card-viewer: initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.FancyImageViewer = function ({ front, back, border, faceDown, share }) {
-            return new FancyDisplay(front, back, border, faceDown, share);
+        globalThis.OrcnogFancyDisplay = function ({ image = null, front = null, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) {
+            return new FancyDisplay(front, back, border, faceDown);
+        };
+
+        // Expose the CardDealer constructor as a global function for macros and such
+        globalThis.OrcnogFancyCardDealer = function ({ deckName, discardPileName }) {
+            return new CardDealer(deckName, discardPileName);
+        };
+
+        // Construct a FancyDisplay for just a simple image
+        globalThis.OrcnogFancyImage = function (image) {
+            return new FancyDisplay(image, null, null, null);
         };
 
         function handleCardViewerSocketEvent({ type, payload }) {
@@ -74,7 +98,15 @@ export default function registerHooks() {
             }
         }
 
-        game.socket.on('module.card-viewer', handleCardViewerSocketEvent);
+        game.socket.on('module.orcnog-card-viewer', handleCardViewerSocketEvent);
+
+        // Emit hook on init complete
+        // Usage: game.socket.on('module.orcnog-card-viewer', ({ type, payload }) => type === 'INITIALIZED' && /* do stuff */);
+        game.socket.emit('module.orcnog-card-viewer', {
+            type: 'INITIALIZED',
+            payload: {}
+        });
+        console.log('orcnog-card-viewer: initialized');
     });
 
     Hooks.once('getCardsDirectoryEntryContext', (html, itemDropDowns) => {

@@ -33,7 +33,7 @@ class FancyDisplay {
 
                     static get defaultOptions() {
                         return mergeObject(super.defaultOptions, {
-                            template: "modules/card-viewer/templates/card-viewer.html",
+                            template: "modules/orcnog-card-viewer/templates/orcnog-card-viewer.html",
                             popOut: false,
                             minimizable: true,
                             resizable: true,
@@ -43,7 +43,7 @@ class FancyDisplay {
                     }
 
                     activateListeners (html) {
-                        console.log("card-viewer popout has rendered")
+                        console.log("orcnog-card-viewer popout has rendered")
                         this.jsEvents(html[0]);
                     }
 
@@ -55,7 +55,7 @@ class FancyDisplay {
                         const wrpCardFlip = html.querySelector('.decks-draw__wrp-card-flip');
 
                         if (imgBackPath) {
-                            const btnFlip = html.querySelector('.card-viewer-flip-button');
+                            const btnFlip = html.querySelector('.orcnog-card-viewer-flip-button');
                             btnFlip.addEventListener("click", (evt) => {
                                 evt.stopPropagation();
                                 wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
@@ -177,7 +177,7 @@ class FancyDisplay {
                 // Check if the user is the GM
                 if (share && game.user.isGM) {
                     // Emit a socket message to all players
-                    game.socket.emit('module.card-viewer', {
+                    game.socket.emit('module.orcnog-card-viewer', {
                         type: 'VIEWCARD',
                         payload: {
                             imgFrontPath: this.imgFrontPath,

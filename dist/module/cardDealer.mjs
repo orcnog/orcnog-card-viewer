@@ -56,13 +56,14 @@ class CardDealer {
         this.initPromiseResolve();
     }
 
-    async draw() {
+    async draw(share) {
         try {
             await this.initPromise;
 
             const deckName = this.deckName;
             const deck = this.deck;
             const pile = this.pile;
+            const shareToAll = share;
 
             // Deal 1 random card and grab reference to the dealt card
             await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM });
@@ -72,7 +73,7 @@ class CardDealer {
             const { name, front, back, desc, border, faceDown } = this._extractCardProperties(drawnCard);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown).render(true);
+            new FancyDisplay(front, back, border, faceDown).render(shareToAll);
 
             // Whisper the card instructions to the DM
             this._whisperCardInstructions(name, front, desc);
@@ -82,9 +83,10 @@ class CardDealer {
         }
     }
 
-    async view(cardName) {
+    async view(cardName, share) {
         try {
             const deck = this.deck;
+            const shareToAll = share;
 
             if (!cardName) {
                 ui.notifications.warn("Card name not provided.");
@@ -102,7 +104,7 @@ class CardDealer {
             const { name, front, back, desc, border, faceDown } = this._extractCardProperties(card);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown).render(true);
+            new FancyDisplay(front, back, border, faceDown).render(shareToAll);
 
             // Whisper the card instructions to the DM
             this._whisperCardInstructions(name, front, desc);
@@ -151,7 +153,7 @@ class CardDealer {
             return;
         }
 
-        const messageContent = `<div class="card-draw card-viewer-msg flexrow" data-font="${front}">
+        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-font="${front}">
                 <img class="card-face" src="${front}" alt="${name}" />
                 <h4 class="card-name">${name}</h4>
             </div>

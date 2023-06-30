@@ -166,7 +166,7 @@ class RenderCard {
     metasSparkles.forEach(it => it.imgSparkle.classList.add("decks-draw__img-sparkle--visible"));
     
     const cardViewer = document.createElement("div");
-    cardViewer.className = "card-viewer";
+    cardViewer.className = "orcnog-card-viewer";
     cardViewer.appendChild(wrpDrawn);
 
     // Return HTML
