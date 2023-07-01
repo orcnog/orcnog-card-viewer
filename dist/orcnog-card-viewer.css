@@ -4,28 +4,10 @@
     position: relative;
 }
 
-.orcnog-card-viewer img {
-    border: 0;
-}
-
 .orcnog-card-viewer * {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-}
-
-.orcnog-card-viewer :after,
-.orcnog-card-viewer :before {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.orcnog-card-viewer img {
-    vertical-align: middle;
-}
-
-.orcnog-card-viewer * {
     scrollbar-width: thin;
 }
 
@@ -40,6 +22,56 @@
 
 .orcnog-card-viewer ::-webkit-scrollbar-thumb {
     background: #475b6b;
+}
+
+.orcnog-card-viewer :after,
+.orcnog-card-viewer :before {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+      
+.orcnog-card-viewer .orcnog-card-viewer-share-btn {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    border: 0;
+    width: auto;
+    font-size: 1.5rem;
+    color: #000;
+    background: transparent;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+}
+
+.orcnog-card-viewer .orcnog-card-viewer-share-btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0%;
+    height: 0%;
+    border-radius: 50%;
+    box-shadow: 0 0 3rem 2rem rgb(255 255 185 / 50%);
+    z-index: -1;
+    animation: pulse 5s infinite linear;
+}
+      
+.orcnog-card-viewer .orcnog-card-viewer-share-btn[disabled] {
+    opacity: 0;
+}
+
+.orcnog-card-viewer .orcnog-card-viewer-share-btn i {
+    animation:
+        float-up-down 7s infinite ease-in-out alternate,
+        float-side-to-side 11s infinite ease-in-out alternate,
+        rotate-a-little 5s infinite ease-in-out alternate;
+}
+
+.orcnog-card-viewer img {
+    border: 0;
+    vertical-align: middle;
 }
 
 .orcnog-card-viewer .no-events {
@@ -66,6 +98,8 @@
 .orcnog-card-viewer .ve-flex-v-center {
     display: flex !important;
     align-items: center !important;
+    max-width: 32rem;
+    width: 62%;
 }
 
 .orcnog-card-viewer .ve-flex-vh-center {
@@ -96,7 +130,7 @@
 }
 
 .orcnog-card-viewer .decks-draw__stg--visible {
-    box-shadow: inset 0 0 100vh 100vh rgba(0, 0, 0, 0.77);
+    box-shadow: inset 0 0 100vh 100vh rgba(0, 0, 0, 0.88);
     transition: box-shadow 500ms;
 }
 
@@ -124,7 +158,7 @@
 
 .orcnog-card-viewer .decks-draw__wrp-card {
     padding: 0;
-    border-radius: 1rem;
+    border-radius: 3%;
     scale: 0;
     background-color: var(--rgb-card-border-color); /*#d29a38;*/
     box-shadow: 0 0 30px 10px rgba(210, 154, 56, 0.3);
@@ -132,7 +166,7 @@
 }
 
 .orcnog-card-viewer.has-border .decks-draw__wrp-card {
-    padding: 1rem;
+    padding: 3%;
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card:hover {
@@ -149,8 +183,8 @@
 
 .orcnog-card-viewer .decks-draw__img-card {
     z-index: 0;
-    max-height: 50vh;
-    max-width: 60vw;
+    max-height: 100%; /*50vh;*/
+    max-width: 100%; /*60vw;*/
 }
 
 .orcnog-card-viewer .decks-draw__img-card-back {
@@ -162,8 +196,8 @@
 }
 
 .orcnog-card-viewer.has-border .decks-draw__img-card-back {
-    width: calc(100% - 2rem);
-    height: calc(100% - 2rem);
+    width: calc(100% - 6%); /* calc(100% - 2rem); */
+    height: calc(100% - 6%); /* calc(100% - 2rem); */
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-sway {
@@ -200,86 +234,58 @@
     transform: rotateY(180deg);
 }
 
+.chat-sidebar .orcnog-card-viewer-msg img.card-face,
+.cards-config .card img.card-face {
+    cursor: pointer;
+}
+
+/* Share Button Animations */
+@keyframes pulse {
+    0%, 100% {box-shadow: 0 0 3rem 2rem rgb(255 255 185 / 50%);}
+    50% {box-shadow: 0 0 4rem 2rem rgb(255 255 255 / 30%);}
+}
+
+@keyframes float-up-down {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -10px, 0); }
+}
+  
+@keyframes float-side-to-side {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(10px, 0, 0); }
+}
+  
+@keyframes rotate-a-little {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+/* Card and Twinkles Animations */
 @keyframes anim-sway {
-    0% {
-        transform: translateX(0) translateY(0);
-    }
-
-    25% {
-        transform: translateX(1rem) translateY(1rem);
-    }
-
-    37.5% {
-        transform: translateX(1.15rem) translateY(0.5rem);
-    }
-
-    50% {
-        transform: translateX(1rem) translateY(0);
-    }
-
-    75% {
-        transform: translateX(0) translateY(1rem);
-    }
-
-    87.5% {
-        transform: translateX(-0.15rem) translateY(0.5rem);
-    }
-
-    100% {
-        transform: translateX(0) translateY(0);
-    }
+    0%, 100% {transform: translateX(0) translateY(0);}
+    25% {transform: translateX(1rem) translateY(1rem);}
+    37.5% {transform: translateX(1.15rem) translateY(0.5rem);}
+    50% {transform: translateX(1rem) translateY(0);}
+    75% {transform: translateX(0) translateY(1rem);}
+    87.5% {transform: translateX(-0.15rem) translateY(0.5rem);}
 }
 
 @keyframes anim-sparkle-twinkle {
-    0% {
-        filter: initial;
-    }
-
-    25% {
-        filter: blur(1px) brightness(90%) contrast(150%) drop-shadow(0 0 17px #f6f6f6) hue-rotate(5deg) opacity(75%) saturate(80%);
-    }
-
-    50% {
-        filter: blur(1px) brightness(110%) contrast(75%) drop-shadow(0 0 5px white) hue-rotate(-5deg) opacity(75%) saturate(110%);
-    }
-
-    100% {
-        filter: initial;
-    }
+    0%, 100% {filter: initial;}
+    25% {filter: blur(1px) brightness(90%) contrast(150%) drop-shadow(0 0 17px #f6f6f6) hue-rotate(5deg) opacity(75%) saturate(80%);}
+    50% {filter: blur(1px) brightness(110%) contrast(75%) drop-shadow(0 0 5px white) hue-rotate(-5deg) opacity(75%) saturate(110%);}
 }
 
 @keyframes anim-sparkle-warp {
-    0% {
-        transform: rotateX(0) rotateY(0) rotateZ(0);
-    }
-
-    25% {
-        transform: rotateX(20deg) rotateY(0) rotateZ(90deg);
-    }
-
-    50% {
-        transform: rotateX(0) rotateY(20deg) rotateZ(180deg);
-    }
-
-    75% {
-        transform: rotateX(10deg) rotateY(0) rotateZ(270deg);
-    }
-
-    100% {
-        transform: rotateX(0) rotateY(0) rotateZ(360deg);
-    }
+    0% {transform: rotateX(0) rotateY(0) rotateZ(0);}
+    25% {transform: rotateX(20deg) rotateY(0) rotateZ(90deg);}
+    50% {transform: rotateX(0) rotateY(20deg) rotateZ(180deg);}
+    75% {transform: rotateX(10deg) rotateY(0) rotateZ(270deg);}
+    100% {transform: rotateX(0) rotateY(0) rotateZ(360deg);}
 }
 
 @keyframes anim-card-pop-in {
-    0% {
-        scale: 0;
-    }
-
-    65% {
-        scale: 1.2;
-    }
-
-    100% {
-        scale: 1;
-    }
+    0% {scale: 0;}
+    65% {scale: 1.2;}
+    100% {scale: 1;}
 }

@@ -53,17 +53,23 @@ class CardDealer {
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM });
+            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM, action: shareToAll ? 'deal_orcnog_share' : 'deal_orcnog' });
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
             // Extract card properties
-            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(drawnCard);
+            const { id, name, front, back, desc, border } = this._extractCardProperties(drawnCard);
+            const showFaceDown = true;
 
-            // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown).render(shareToAll);
+            if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
+                // Display with fancy card viewer module
+                new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
 
-            // Whisper the card instructions to the DM
-            this._whisperCardInstructions(name, front, desc);
+                if (game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM')) {
+                    // Whisper the card instructions to the DM
+                    this._whisperCardInstructions(deckName, id, name, front, desc);
+                }
+            }
+
 
         } catch (error) {
             console.error("Error rendering CardDraw.draw():", error);
@@ -73,12 +79,17 @@ class CardDealer {
     /**
      * View a card (but do not draw it)
      * @param {string} card This can be the card ID or the card's exact name.
+     * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
+     * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
      * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns 
      */
-    async view(card, share) {
+    async view(card, faceDown, whisper, share) {
         try {
             const deck = this.deck;
+            const deckName = this.deckName;
+            const showFaceDown = faceDown;
+            const doWhisper = whisper;
             const shareToAll = share;
 
             if (!card) {
@@ -94,13 +105,15 @@ class CardDealer {
             }
 
             // Extract card properties
-            const { name, front, back, desc, border, faceDown } = this._extractCardProperties(cardToView);
+            const { id, name, front, back, desc, border } = this._extractCardProperties(cardToView);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, faceDown).render(shareToAll);
+            new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
 
-            // Whisper the card instructions to the DM
-            this._whisperCardInstructions(name, front, desc);
+            if (doWhisper) {
+                // Whisper the card instructions to the DM
+                this._whisperCardInstructions(deckName, id, name, front, desc);
+            }
 
         } catch (error) {
             console.error("Error rendering CardView.view():", error);
@@ -114,7 +127,7 @@ class CardDealer {
             // If no name provided, then lookup piles and try to smart-match by deck name.
             const matchedPileName = this._smartMatchDiscardName(this.deckName);
             pile = game.cards.getName(matchedPileName);
-            if (pile) ui.notifications.warn(`No discard pile name provided. Found a discard pile named "${matchedPileName}", which will be used.`);
+            if (pile) console.warn(`No discard pile name provided. Found a discard pile named "${matchedPileName}", which will be used.`);
         } else {
             // Try to get an existing discard pile by the name provided
             pile = game.cards.getName(discardPileName);
@@ -156,6 +169,7 @@ class CardDealer {
     }
 
     _extractCardProperties(card) {
+        const id = card._id;
         const name = card.faces[0].name;
         const front = card.faces[0].img;
         const back = card.back.img;
@@ -163,19 +177,19 @@ class CardDealer {
         const border = '#d29a38';
         const faceDown = true;
 
-        return { name, front, back, desc, border, faceDown };
+        return { id, name, front, back, desc, border, faceDown };
     }
 
-    _whisperCardInstructions(name, front, desc) {
+    _whisperCardInstructions(deckName, cardId, cardName, front, desc) {
         const dm = game.users.find(u => u.isGM && u.active);
         if (!dm) {
             ui.notifications.warn("DM user not found.");
             return;
         }
 
-        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-font="${front}">
-                <img class="card-face" src="${front}" alt="${name}" />
-                <h4 class="card-name">${name}</h4>
+        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-deck="${deckName}" data-card="${cardId}">
+                <img class="card-face" src="${front}" alt="${cardName}" />
+                <h4 class="card-name">${cardName}</h4>
             </div>
             <p>${desc}</p>`;
 

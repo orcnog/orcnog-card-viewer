@@ -53,6 +53,7 @@ class FancyDisplay {
                         const dispGlint = html.querySelector('.decks-draw__disp-glint');
                         const wrpCard = html.querySelector('.decks-draw__wrp-card');
                         const wrpCardFlip = html.querySelector('.decks-draw__wrp-card-flip');
+                        const shareBtn = html.querySelector('.orcnog-card-viewer-share-btn');
 
                         if (imgBackPath) {
                             const btnFlip = html.querySelector('.orcnog-card-viewer-flip-button');
@@ -66,9 +67,16 @@ class FancyDisplay {
                             evt.stopPropagation();
                         });
 
+                        shareBtn?.addEventListener("click", (evt) => {
+                            evt.stopPropagation();
+                            shareBtn.disabled = true;
+                            FancyDisplay._shareToAll();
+                        });
+
                         wrpDrawn.addEventListener("click", (evt) => {
                             evt.stopPropagation();
-                            html.remove();
+                            // html.remove(); // remove this
+                            $('.orcnog-card-viewer').remove(); // remove ALL
                         });
 
                         wrpDrawn.addEventListener("mousemove", (evt) => {
@@ -163,6 +171,8 @@ class FancyDisplay {
 
                     getData() {
                         const data = super.getData();
+                        data.isGM = game.user.isGM;
+                        data.showShareBtn = !share;
                         data.imgFront = this.imgFrontPath;
                         data.imgBack = this.imgBackPath;
                         data.borderColor = this.border;
@@ -176,17 +186,7 @@ class FancyDisplay {
 
                 // Check if the user is the GM
                 if (share && game.user.isGM) {
-                    // Emit a socket message to all players
-                    game.socket.emit('module.orcnog-card-viewer', {
-                        type: 'VIEWCARD',
-                        payload: {
-                            imgFrontPath: this.imgFrontPath,
-                            imgBackPath: this.imgBackPath,
-                            border: this.border,
-                            faceDown: this.faceDown,
-                            shareToAll: share
-                        }
-                    });
+                    this._shareToAll();
                 }
 
             } else {
@@ -195,6 +195,20 @@ class FancyDisplay {
         } catch (error) {
             console.error("Error rendering FancyPopout:", error);
         }
+    }
+
+    _shareToAll () {
+        // Emit a socket message to all players
+        game.socket.emit('module.orcnog-card-viewer', {
+            type: 'VIEWCARD',
+            payload: {
+                imgFrontPath: this.imgFrontPath,
+                imgBackPath: this.imgBackPath,
+                border: this.border,
+                faceDown: this.faceDown,
+                shareToAll: true
+            }
+        });
     }
 
     _adjustToGlintColor (color) {
