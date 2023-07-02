@@ -1,12 +1,12 @@
 {
-  "name": "card-viewer",
-  "id": "card-viewer",
-  "title": "card-viewer",
+  "name": "Orcnog Card Viewer",
+  "id": "orcnog-card-viewer",
+  "title": "Orcnog Card Viewer",
   "description": "",
   "systems": [],
   "version": "0.1.0",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/module.json",
+  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/orcnog-card-viewer-v0.1.0.zip",
   "url": "",
   "license": "",
   "readme": "",
@@ -17,19 +17,23 @@
   "esmodules": [
     "init.js"
   ],
-  "styles": ["card-viewer.css"],
+  "styles": ["orcnog-card-viewer.css"],
   "packs": [],
   "languages": [],
   "socket": true,
-  "dependencies": [
-    {
-      "name": "socketlib",
-      "manifest": "https://github.com/League-of-Foundry-Developers/socketlib/releases/latest/download/module.json"
-    }
-  ],
+  "dependencies": [],
   "minimumCoreVersion": "0.5.0",
   "compatibility": {
     "minimum": "10.275",
-    "verified": "10.291"
-  }
+    "verified": "11"
+  },
+  "packs": [
+    {
+      "name": "macros",
+      "label": "Orcnog Card Viewer Macros",
+      "path": "packs/macros.db",
+      "type": "Macro",
+      "module": "orcnog-card-viewer"
+    }
+  ]
 }

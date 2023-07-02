@@ -1,6 +1,0 @@
-{
-    "extends": "eslint:recommended",
-    "rules": {
-      // Add your custom linting rules here
-    }
-}

@@ -1,19 +1,19 @@
 class FancyDisplay {
-    constructor(imgFrontPath, imgBackPath, border, showBackFirst, share) {
+    constructor(imgFrontPath, imgBackPath, border, faceDown) {
         this.imgFrontPath = imgFrontPath;
         this.imgBackPath = imgBackPath;
         this.border = border;
-        this.showBackFirst = showBackFirst;
-        this.share = share;
+        this.faceDown = faceDown;
     }
 
-    async render() {
+    async render(shareToAll) {
         try {
             // Specify the image URL or file path
-            const imgFrontPath = this.showBackFirst ? this.imgBackPath : this.imgFrontPath;
-            const imgBackPath = this.showBackFirst ? this.imgFrontPath : this.imgBackPath;
+            const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
+            const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
             const borderColor = this.border;
             const FancyDisplay = this;
+            const share = shareToAll;
 
             if (imgFrontPath) {
                 // Calculate the canvas viewable area
@@ -33,7 +33,7 @@ class FancyDisplay {
 
                     static get defaultOptions() {
                         return mergeObject(super.defaultOptions, {
-                            template: "modules/card-viewer/templates/card-viewer.html",
+                            template: "modules/orcnog-card-viewer/templates/orcnog-card-viewer.html",
                             popOut: false,
                             minimizable: true,
                             resizable: true,
@@ -43,7 +43,7 @@ class FancyDisplay {
                     }
 
                     activateListeners (html) {
-                        console.log("card-viewer popout has rendered")
+                        console.log("orcnog-card-viewer popout has rendered")
                         this.jsEvents(html[0]);
                     }
 
@@ -53,9 +53,10 @@ class FancyDisplay {
                         const dispGlint = html.querySelector('.decks-draw__disp-glint');
                         const wrpCard = html.querySelector('.decks-draw__wrp-card');
                         const wrpCardFlip = html.querySelector('.decks-draw__wrp-card-flip');
+                        const shareBtn = html.querySelector('.orcnog-card-viewer-share-btn');
 
                         if (imgBackPath) {
-                            const btnFlip = html.querySelector('.card-viewer-flip-button');
+                            const btnFlip = html.querySelector('.orcnog-card-viewer-flip-button');
                             btnFlip.addEventListener("click", (evt) => {
                                 evt.stopPropagation();
                                 wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
@@ -66,9 +67,16 @@ class FancyDisplay {
                             evt.stopPropagation();
                         });
 
+                        shareBtn?.addEventListener("click", (evt) => {
+                            evt.stopPropagation();
+                            shareBtn.disabled = true;
+                            FancyDisplay._shareToAll();
+                        });
+
                         wrpDrawn.addEventListener("click", (evt) => {
                             evt.stopPropagation();
-                            html.remove();
+                            // html.remove(); // remove this
+                            $('.orcnog-card-viewer').remove(); // remove ALL
                         });
 
                         wrpDrawn.addEventListener("mousemove", (evt) => {
@@ -163,6 +171,8 @@ class FancyDisplay {
 
                     getData() {
                         const data = super.getData();
+                        data.isGM = game.user.isGM;
+                        data.showShareBtn = !share;
                         data.imgFront = this.imgFrontPath;
                         data.imgBack = this.imgBackPath;
                         data.borderColor = this.border;
@@ -175,18 +185,8 @@ class FancyDisplay {
                 customPopout.render(true);
 
                 // Check if the user is the GM
-                if (this.share && game.user.isGM) {
-                    // Emit a socket message to all players
-                    game.socket.emit('module.card-viewer', {
-                        type: 'VIEWCARD',
-                        payload: {
-                            imgFrontPath: this.imgFrontPath,
-                            imgBackPath: this.imgBackPath,
-                            border: this.border,
-                            showBackFirst: this.showBackFirst,
-                            share: this.share
-                        }
-                    });
+                if (share && game.user.isGM) {
+                    this._shareToAll();
                 }
 
             } else {
@@ -197,7 +197,22 @@ class FancyDisplay {
         }
     }
 
+    _shareToAll () {
+        // Emit a socket message to all players
+        game.socket.emit('module.orcnog-card-viewer', {
+            type: 'VIEWCARD',
+            payload: {
+                imgFrontPath: this.imgFrontPath,
+                imgBackPath: this.imgBackPath,
+                border: this.border,
+                faceDown: this.faceDown,
+                shareToAll: true
+            }
+        });
+    }
+
     _adjustToGlintColor (color) {
+        if (!color) return null;
         const Y = 58; // yellow
         const [H, S, L] = this._convertHexToHSL(color);
         // const newH = (H + Y) / 2;
