@@ -5,8 +5,8 @@
   "description": "",
   "systems": [],
   "version": "0.1.0",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/module.json",
+  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/orcnog-card-viewer-v0.1.0.zip",
   "url": "",
   "license": "",
   "readme": "",
@@ -25,7 +25,7 @@
   "minimumCoreVersion": "0.5.0",
   "compatibility": {
     "minimum": "10.275",
-    "verified": "10.291"
+    "verified": "11"
   },
   "packs": [
     {
