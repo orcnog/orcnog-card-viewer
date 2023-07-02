@@ -1,0 +1,33 @@
+{
+  "name": "orcnog-card-viewer",
+  "version": "0.0.1",
+  "description": "A Foundry VTT module that displays cards in a beautiful 3D-like viewer",
+  "main": "dist/init.js",
+  "scripts": {
+    "lint": "eslint . --ext .js",
+    "lint-css": "stylelint 'dist/**/*.css' --fix",
+    "zip": "node zip.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orcnog/orcnog-card-viewer.git"
+  },
+  "keywords": [
+    "Foundry",
+    "orcnog",
+    "cards"
+  ],
+  "author": "orcnog",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/orcnog/orcnog-card-viewer/issues"
+  },
+  "homepage": "https://github.com/orcnog/orcnog-card-viewer#readme",
+  "devDependencies": {
+    "archiver": "^5.3.1",
+    "eslint": "^8.44.0",
+    "readline-sync": "^1.4.10",
+    "stylelint": "^15.9.0",
+    "stylelint-config-standard": "^33.0.0"
+  }
+}
