@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint . --ext .js",
     "lint-css": "stylelint 'dist/**/*.css' --fix",
-    "zip": "node zip.js"
+    "ver": "node versionbump.js"
   },
   "repository": {
     "type": "git",
