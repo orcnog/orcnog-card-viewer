@@ -4,9 +4,9 @@
   "title": "Orcnog Card Viewer",
   "description": "",
   "systems": [],
-  "version": "0.1.0",
-  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/module.json",
-  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.0/orcnog-card-viewer-v0.1.0.zip",
+  "version": "0.1.2",
+  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/module.json",
+  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/orcnog-card-viewer-v0.1.2.zip",
   "url": "",
   "license": "",
   "readme": "",
@@ -17,16 +17,9 @@
   "esmodules": [
     "init.js"
   ],
-  "styles": ["orcnog-card-viewer.css"],
-  "packs": [],
-  "languages": [],
-  "socket": true,
-  "dependencies": [],
-  "minimumCoreVersion": "0.5.0",
-  "compatibility": {
-    "minimum": "10.275",
-    "verified": "11"
-  },
+  "styles": [
+    "orcnog-card-viewer.css"
+  ],
   "packs": [
     {
       "name": "macros",
@@ -35,5 +28,20 @@
       "type": "Macro",
       "module": "orcnog-card-viewer"
     }
-  ]
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json",
+      "flags": {}
+    }
+  ],
+  "socket": true,
+  "dependencies": [],
+  "minimumCoreVersion": "0.5.0",
+  "compatibility": {
+    "minimum": "10.275",
+    "verified": "11"
+  }
 }

@@ -46,7 +46,8 @@ export default function registerHooks() {
             view: function (deckName, card, faceDown, whisper, share) {
                 new CardDealer(deckName).view(card, faceDown, whisper, share);
             },
-            // View an image (no border, can't flip)
+            // View an image. (no border, can't flip)
+            // WARNING: Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect
             // Example: `game.modules.get('orcnog-card-viewer').api.viewImage(imgPath, true);`
             viewImage: function (image, share) {
                 new FancyDisplay(image).render(share);
@@ -86,6 +87,7 @@ export default function registerHooks() {
         };
 
         // Construct a FancyDisplay for just a simple image
+        // WARNING! Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect.
         globalThis.OrcnogFancyImage = function (image) {
             return new FancyDisplay(image, null, null, null);
         };
@@ -167,8 +169,9 @@ export default function registerHooks() {
             dest.forEach(card => {
                 const faceDown = true;
                 const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
-                const shareToAll = context.action === 'deal_orcnog_share';
-                viewer.view(card._id, faceDown, whisper, shareToAll);
+                const shareToAll = context.action.includes('orcnog_card_viewer_doshare');
+                const doView = !context.action.includes('orcnog_card_viewer_noshow');
+                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });
     });
@@ -191,6 +194,14 @@ export default function registerHooks() {
 //TODO: Set a default card back image if none is provided yet display is definitely in a "card" context.
 
 //TODO: Add more custom macro icons to /assets?
+
+//TODO: Support non-card images...
+    //TODO: Support max-height sizing for images that aren't nec card-shaped.
+    //TODO: Support png / webp transparency (might be contingent on removing glint effects)
+    //TODO: Add options to remove glint affects (for non-card images)
+    //TODO: Add simple image macros back once support is satisfactory.
+
+//TODO: Stretch goal - Anything that has a click-to-show, shuold also support drag-to-canvas.
 
 //TODO: Stretch goal - set up a module setting to let the user choose the default card back image? Include ability to define a URL.
 
