@@ -53,14 +53,15 @@ class CardDealer {
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM, action: shareToAll ? 'deal_orcnog_share' : 'deal_orcnog' });
+            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM, action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal' });
+
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
             // Extract card properties
             const { id, name, front, back, desc, border } = this._extractCardProperties(drawnCard);
             const showFaceDown = true;
 
-            if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
+            if (!game.settingorcnog_card_viewer_optionss.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
                 new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
 
