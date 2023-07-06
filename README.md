@@ -227,4 +227,17 @@ These functions shuold be accessible at the global level. Use them in macros or 
 * ## OrcnogFancyImage( options )
 
     An alias for the `api.viewImage` method.  See: api.viewImage above. Warning: this is only experimental functionality!
-            
+
+# Changelog
+
+## v0.0.0
+testing this github release functionality.
+
+## v0.1.0
+Orcnog Card Viewer's world debut! (or so i thought!)
+
+## v0.1.1
+Release 0.1.1 - ready for package submission!
+
+## v0.1.2
+First round of bugfixes and me-aculpas. Added decent README (including this changelog section), and a demo video. Nerfed the compatibility to just v11, as user feedback indicates it's not compatible with v10 =/
