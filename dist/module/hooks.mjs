@@ -77,7 +77,7 @@ export default function registerHooks() {
         console.log('orcnog-card-viewer: initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.OrcnogFancyDisplay = function ({ image = null, front = null, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) {
+        globalThis.OrcnogFancyDisplay = function ({ front = null, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) {
             return new FancyDisplay(front, back, border, faceDown);
         };
 

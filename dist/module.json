@@ -1,18 +1,19 @@
 {
-  "name": "Orcnog Card Viewer",
+  "name": "Card Viewer",
   "id": "orcnog-card-viewer",
-  "title": "Orcnog Card Viewer",
+  "title": "Card Viewer",
   "description": "",
   "systems": [],
   "version": "0.1.2",
-  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/module.json",
-  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/orcnog-card-viewer-v0.1.2.zip",
-  "url": "",
   "license": "",
   "readme": "",
   "bugs": "",
   "changelog": "",
   "author": "orcnog",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "11"
+  },
   "scripts": [],
   "esmodules": [
     "init.js"
@@ -23,7 +24,7 @@
   "packs": [
     {
       "name": "macros",
-      "label": "Orcnog Card Viewer Macros",
+      "label": "Card Viewer Macros",
       "path": "packs/macros.db",
       "type": "Macro",
       "module": "orcnog-card-viewer"
@@ -38,10 +39,7 @@
     }
   ],
   "socket": true,
-  "dependencies": [],
-  "minimumCoreVersion": "0.5.0",
-  "compatibility": {
-    "minimum": "10.275",
-    "verified": "11"
-  }
+  "url": "https://github.com/orcnog/orcnog-card-viewer/",
+  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/module.json",
+  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.2/orcnog-card-viewer-v0.1.2.zip"
 }
