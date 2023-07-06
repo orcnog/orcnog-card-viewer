@@ -237,7 +237,10 @@ testing this github release functionality.
 Orcnog Card Viewer's world debut! (or so i thought!)
 
 ## v0.1.1
-Release 0.1.1 - ready for package submission!
+Release 0.1.1 - ready for package submission! (or so i thought!)
 
 ## v0.1.2
+Release 0.1.2 - some quick changes for package approval. removed possibly-copyrighted sabaac image. ACTUAL WORLD DEBUT HERE.  Hello world!
+
+## v0.1.3
 First round of bugfixes and me-aculpas. Added decent README (including this changelog section), and a demo video. Nerfed the compatibility to just v11, as user feedback indicates it's not compatible with v10 =/
