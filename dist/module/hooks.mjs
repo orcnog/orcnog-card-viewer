@@ -129,7 +129,7 @@ export default function registerHooks() {
             const faceDown = deckCard.face === null;
             const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
             const shareToAll = false;
-            if (id) new CardDealer('Deck of Many Things').view(id, faceDown, whisper, shareToAll);
+            if (id) new CardDealer(deckCard.source.name).view(id, faceDown, whisper, shareToAll);
         });
 
         // TODO: Drag to canvas
