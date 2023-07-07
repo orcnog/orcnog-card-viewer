@@ -61,7 +61,7 @@ class CardDealer {
             const { id, name, front, back, desc, border } = this._extractCardProperties(drawnCard);
             const showFaceDown = true;
 
-            if (!game.settingorcnog_card_viewer_optionss.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
+            if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
                 new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
 
