@@ -169,8 +169,8 @@ export default function registerHooks() {
             dest.forEach(card => {
                 const faceDown = true;
                 const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes('orcnog_card_viewer_doshare');
-                const doView = !context.action.includes('orcnog_card_viewer_noshow');
+                const shareToAll = game.settings.get('orcnog-card-viewer', 'share')
+                const doView = game.settings.get('orcnog-card-viewer', 'view');
                 if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });
