@@ -244,3 +244,6 @@ Release 0.1.2 - some quick changes for package approval. removed possibly-copyri
 
 ## v0.1.3
 First round of bugfixes and me-aculpas. Added decent README (including this changelog section), and a demo video. Nerfed the compatibility to just v11, as user feedback indicates it's not compatible with v10 =/
+
+## v0.1.4
+Fixed Issue #10, 'Deck of Many Things' hardcoded. Also added a new GIF demo video.
