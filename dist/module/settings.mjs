@@ -26,4 +26,21 @@ export const registerSettings = function() {
         default: true,
         type: Boolean
     });
-}
+    // Enable/disable whispering card details to the DM on view.
+    game.settings.register('orcnog-card-viewer', 'share', {
+        name: "Share Card to Chat",
+        hint: "Determines whether or not to share the card to chat.",
+        scope: 'world',
+        config: false,
+        default: true,
+        type: Boolean
+    });
+    game.settings.register('orcnog-card-viewer', 'view', {
+        name: "View Card(s)",
+        hint: "Determines whether or not to view the cards for a given action.",
+        scope: 'world',
+        config: false,
+        default: true,
+        type: Boolean
+    });
+};
