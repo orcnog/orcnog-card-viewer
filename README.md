@@ -247,3 +247,6 @@ First round of bugfixes and me-aculpas. Added decent README (including this chan
 
 ## v0.1.4
 Fixed Issue #10, 'Deck of Many Things' hardcoded. Also added a new GIF demo video.
+
+## v0.1.5
+Fixed a bug pointed out by @kristianserrano in this PR: https://github.com/orcnog/orcnog-card-viewer/pull/14/files
