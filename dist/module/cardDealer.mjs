@@ -39,6 +39,7 @@ class CardDealer {
     }
 
     async draw(share) {
+        await game.settings.set('orcnog-card-viewer', 'share', share);
         try {
             await this.initPromise;
 
@@ -53,7 +54,7 @@ class CardDealer {
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM, action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal' });
+            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM});
 
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
@@ -83,10 +84,11 @@ class CardDealer {
      * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
      * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
      * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
-     * @returns 
+     * @returns
      */
     async view(card, faceDown, whisper, share) {
         try {
+            await game.settings.set('orcnog-card-viewer', 'share', share);
             const deck = this.deck;
             const deckName = this.deckName;
             const showFaceDown = faceDown;

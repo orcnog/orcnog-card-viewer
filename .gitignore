@@ -4,3 +4,4 @@ foundryconfig.json
 versionbump.js
 playtest.py
 /archive
+.DS_Store

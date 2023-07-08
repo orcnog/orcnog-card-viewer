@@ -120,7 +120,7 @@ export default function registerHooks() {
         // Exit early if necessary;
         if (!game.settings.get('orcnog-card-viewer', 'enableCardIconClick')) return;
         if (app instanceof CardsConfig !== true) return;
-      
+
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
         $card_icon.on('click.orcnog_card_viewer', (event) => {
@@ -160,7 +160,7 @@ export default function registerHooks() {
         // Exit early if necessary;
         if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) return;
         if (context.toCreate.length === 0) return;
-      
+
         // Show any and all cards that were dealt
         // TODO: show multiple cards in one render (instead of multiple renders)
         // Temporary TODO^ fix: on click of background, close all popped up cards.
@@ -169,8 +169,8 @@ export default function registerHooks() {
             dest.forEach(card => {
                 const faceDown = true;
                 const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes('orcnog_card_viewer_doshare');
-                const doView = !context.action.includes('orcnog_card_viewer_noshow');
+                const shareToAll = game.settings.get('orcnog-card-viewer', 'share')
+                const doView = game.settings.get('orcnog-card-viewer', 'view');
                 if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });
