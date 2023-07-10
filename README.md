@@ -156,7 +156,6 @@ This module ships with several API methods that can be leveraged in code, and a 
     Args:
     * `deckName` {String} - see: api.CardDealer > deckName
     * `card` {String} - the name or ID of the card to view
-    * `isFaceDown` {Boolean} - whether the card should display face-down (true) or face-up (false)
     * `whisper` {Boolean} - whether the card description text should be whispered to the DM
     * `share` {Boolean} (optional) - whether the card will be shared to all players on draw(default is true)
 
@@ -200,7 +199,6 @@ These functions shuold be accessible at the global level. Use them in macros or 
     front: myFrontImg,
     back: myBackImg,
     border: myCstomBorderColor,
-    isFaceDown: false
     });
 
     // and later on...
