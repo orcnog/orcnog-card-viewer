@@ -1,36 +1,35 @@
 class FancyDisplay {
-    constructor(imgFrontPath, imgBackPath, border, faceDown) {
+    constructor({imgFrontPath, imgBackPath, borderColor, borderWidth, faceDown}) {
         this.imgFrontPath = imgFrontPath;
         this.imgBackPath = imgBackPath;
-        this.border = border;
+        this.borderColor = borderColor;
+        this.borderWidth = borderWidth;
         this.faceDown = faceDown;
     }
 
     async render(shareToAll) {
         try {
             // Specify the image URL or file path
+            const FancyDisplay = this;
+            if (!this.imgBackPath) this.imgBackPath = game.settings.get('orcnog-card-viewer', 'defaultCardBackImage');
             const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
             const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
-            const borderWidth = game.settings.get('orcnog-card-viewer', 'defaultCardBorderWidth') || '8px';
-            const borderColor = this.border || (borderWidth == '0px' ? '#fff296' : 'transparent'); // #fff296 is the approx color of the sparkle floaties in the background
-            const FancyDisplay = this;
+            const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
+            const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
             const share = shareToAll;
 
             if (imgFrontPath) {
-                // Calculate the canvas viewable area
-                const sidebarWidth = ui.sidebar.position.width;
-                const controlsWidth = ui.controls.position.width;
-                const dialogWidth = "100vw"; //window.innerWidth - (controlsWidth + sidebarWidth);
+                const dialogWidth = "100vw";
                 const dialogHeight = "100vh";
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(front, back, border, borderWidth) {
+                    constructor(front, back, borderColor, borderWidth) {
                         super();
                         this.imgFrontPath = front;
                         this.imgBackPath = back;
                         this.borderWidth = borderWidth;
-                        this.border = border;
+                        this.borderColor = borderColor;
                     }
 
                     static get defaultOptions() {
@@ -50,7 +49,7 @@ class FancyDisplay {
                     }
 
                     async jsEvents (html) {
-                        // JS manipulation - 95 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
+                        // JS manipulation - 85 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
                         const wrpDrawn = html.querySelector('.decks-draw__stg');
                         const dispGlint = html.querySelector('.decks-draw__disp-glint');
                         const wrpCard = html.querySelector('.decks-draw__wrp-card');
@@ -111,8 +110,8 @@ class FancyDisplay {
                             const rotX = cMouseY / scaleFactor;
                             const rotY = cMouseX / scaleFactor;
 
-                            const glintEdgeSpreadTop = borderWidth === '0px' ? 110 : 100;
-                            const glintEdgeSpreadBottom = borderWidth === '0px' ? -10 : 0;
+                            const glintEdgeSpreadTop = parseInt(borderWidth) == 0 ? 110 : 100;
+                            const glintEdgeSpreadBottom = parseInt(borderWidth) == 0 ? -10 : 0;
                         
                             return {
                                 ..._pRenderStgCard_getPerspectiveStyles_card({mouseX, mouseY, bcr, hView, rotX, rotY}),
@@ -180,9 +179,10 @@ class FancyDisplay {
                         data.showShareBtn = !share;
                         data.imgFront = this.imgFrontPath;
                         data.imgBack = this.imgBackPath;
-                        data.borderColor = this.border;
+                        data.hasBorder = parseInt(this.borderWidth) !== 0;
+                        data.borderColor = this.borderColor;
                         data.borderWidth = this.borderWidth;
-                        data.glintColor = FancyDisplay._adjustToGlintColor(this.border, );
+                        data.glintColor = FancyDisplay._adjustToGlintColor(this.borderColor, );
                         return data;
                     }
                 }
@@ -210,7 +210,8 @@ class FancyDisplay {
             payload: {
                 imgFrontPath: this.imgFrontPath,
                 imgBackPath: this.imgBackPath,
-                border: this.border,
+                borderColor: this.borderColor,
+                borderWidth: this.borderWidth,
                 faceDown: this.faceDown,
                 shareToAll: true
             }
@@ -268,7 +269,39 @@ class FancyDisplay {
         }
       
         return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
-    }      
+    }  
+
+    _getBorderWidth (input) {
+        let bwidth;
+        if (input == '0' || input == 'none') {
+            // any zero value should be explicitly "0px" for CSS calc() purposes
+            bwidth = '0px';
+        } else if (input == null) {
+            // no value provided? get the default from game settings. fallback to 8px
+            bwidth = game.settings.get('orcnog-card-viewer', 'defaultCardBorderWidth') || '8px';
+        } else if (!isNaN(Number(input))) {
+            // assume unitless number is a pixel value
+            bwidth = input + 'px';
+        } else {
+            // assume a complex NaN string is some valid css value (e.g. '1rem', '15px', '2%', etc). If not, it's their own fault >=|
+            bwidth = input;
+        }
+        return bwidth;
+    }
+
+    _getBorderColor (input, borderWidth) {
+        let bcolor;
+        if (input) {
+            bcolor = input;
+        } else if (parseInt(borderWidth) == 0) {
+            // If no border setting this will at least give us some color to the glint edge effect.
+            bcolor = '#fff296'; // #fff296 is the approx color of the sparkle floaties in the background.
+        } else {
+            // no value provided? get the default from game settings. fallback to #d29a38
+            bcolor = game.settings.get('orcnog-card-viewer', 'defaultCardBorderColor') || '#d29a38';
+        }
+        return bcolor;
+    }
 
 }
 
