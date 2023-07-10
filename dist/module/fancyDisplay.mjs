@@ -11,7 +11,8 @@ class FancyDisplay {
             // Specify the image URL or file path
             const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
             const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
-            const borderColor = this.border;
+            const borderWidth = game.settings.get('orcnog-card-viewer', 'defaultCardBorderWidth') || '8px';
+            const borderColor = this.border || (borderWidth == '0px' ? '#fff296' : 'transparent'); // #fff296 is the approx color of the sparkle floaties in the background
             const FancyDisplay = this;
             const share = shareToAll;
 
@@ -24,10 +25,11 @@ class FancyDisplay {
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(front, back, border) {
+                    constructor(front, back, border, borderWidth) {
                         super();
                         this.imgFrontPath = front;
                         this.imgBackPath = back;
+                        this.borderWidth = borderWidth;
                         this.border = border;
                     }
 
@@ -108,10 +110,13 @@ class FancyDisplay {
                         
                             const rotX = cMouseY / scaleFactor;
                             const rotY = cMouseX / scaleFactor;
+
+                            const glintEdgeSpreadTop = borderWidth === '0px' ? 110 : 100;
+                            const glintEdgeSpreadBottom = borderWidth === '0px' ? -10 : 0;
                         
                             return {
                                 ..._pRenderStgCard_getPerspectiveStyles_card({mouseX, mouseY, bcr, hView, rotX, rotY}),
-                                ..._pRenderStgCard_getPerspectiveStyles_glint({mouseX, mouseY, bcr, hView, rotX, rotY}),
+                                ..._pRenderStgCard_getPerspectiveStyles_glint({mouseX, mouseY, bcr, hView, rotX, rotY, glintEdgeSpreadTop, glintEdgeSpreadBottom}),
                             };
                         }
 
@@ -121,7 +126,7 @@ class FancyDisplay {
                             };
                         }
 
-                        function _pRenderStgCard_getPerspectiveStyles_glint ({mouseX, mouseY, bcr, hView, rotX, rotY}) {
+                        function _pRenderStgCard_getPerspectiveStyles_glint ({mouseX, mouseY, bcr, hView, rotX, rotY, glintEdgeSpreadTop, glintEdgeSpreadBottom}) {
                             const cCenterX = bcr.left + bcr.width / 2;
                             const cCenterY = bcr.top + bcr.height / 2;
                         
@@ -157,10 +162,10 @@ class FancyDisplay {
                         
                             const gradEdge = `linear-gradient(
                                 ${-rotX + rotY}rad,
-                                var(--rgb-card-glint--edge) 0%,
+                                var(--rgb-card-glint--edge) ${glintEdgeSpreadBottom}%,
                                 transparent 4%,
                                 transparent 96%,
-                                var(--rgb-card-glint--edge) 100%
+                                var(--rgb-card-glint--edge) ${glintEdgeSpreadTop}%
                             )`;
                         
                             return {
@@ -176,12 +181,13 @@ class FancyDisplay {
                         data.imgFront = this.imgFrontPath;
                         data.imgBack = this.imgBackPath;
                         data.borderColor = this.border;
-                        data.glintColor = FancyDisplay._adjustToGlintColor(this.border);
+                        data.borderWidth = this.borderWidth;
+                        data.glintColor = FancyDisplay._adjustToGlintColor(this.border, );
                         return data;
                     }
                 }
 
-                const customPopout = new CustomPopout(imgFrontPath, imgBackPath, borderColor);
+                const customPopout = new CustomPopout(imgFrontPath, imgBackPath, borderColor, borderWidth);
                 customPopout.render(true);
 
                 // Check if the user is the GM
@@ -212,14 +218,15 @@ class FancyDisplay {
     }
 
     _adjustToGlintColor (color) {
-        if (!color) return null;
+        if (!color || color == 'transparent') return null;
         const Y = 58; // yellow
         const [H, S, L] = this._convertHexToHSL(color);
         // const newH = (H + Y) / 2;
         const newH = (H > (Y+10) ? H-10 : H < (Y-10) ? H+10 : Y); // bring H up to 10 clicks closer to the number 58
         const newS = Math.pow(S, 1.08); // up the saturation exponentially ^1.08
         const newL = (L*10 + 100) / 11; // up the lightness by 9-ish percent
-        return `hsl(${Math.round(newH)}, ${Math.round(newS)}%, ${Math.round(newL)}%)`;
+        const alpha = '100';
+        return `hsl(${Math.round(newH)} ${Math.round(newS)}% ${Math.round(newL)}% / ${alpha})`;
     }
 
     _convertHexToHSL (color) {
