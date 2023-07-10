@@ -264,3 +264,6 @@ Fixed a bug pointed out by @kristianserrano in this PR: https://github.com/orcno
 
 ## v0.1.6
 This release is for testing only!  It's a carbon copy of the v0.1.5 release, but the compatibility is lowered to include v10.
+
+## v0.1.7
+Added game settings for default border color & width and cardback image. Made borderWidth configurable in macros and api calls. Fixed Issue #18.
