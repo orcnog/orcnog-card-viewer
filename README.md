@@ -39,21 +39,21 @@ OrcnogFancyCardDealer({
 ## View a Card
 1. Replace 'Deck of Many Things' with name of a deck in your world.
 2. Replace 'Gem' with the name of a card in the deck or the UID.
-3. set faceDown to true and the card will shown flipped.
-4. If you set share to true, everyone logged in FVTT will see the card.
+3. Flip the card in its stack and the card will be shown flipped.
+4. Flip the card in the viewer, and the card is flipped in its stack.
+5. If you set share to true, everyone logged in FVTT will see the card.
 
 ```
 // Peeks at a card, but does not draw and discard it.
 
 let deckName = 'Deck of Many Things';
 let card = 'Gem'; // card name or ID
-let faceDown = true;
 let whisper = false;
 let share = false;
 
 OrcnogFancyCardDealer({
    deckName: deckName,
-}).view(card, faceDown, whisper, share);
+}).view(card, whisper, share);
 ```
 
 ## View Any Image as a Card
@@ -73,9 +73,10 @@ let cardBorder = '#da6'; // optional
 let shareToAll = true;
 
 OrcnogFancyDisplay({
+   card: null,
+   border: cardBorder,
    front: img,
-   back: backImg,
-   border: cardBorder
+   back: backImg
 }).render(shareToAll)
 ```
 
@@ -92,7 +93,6 @@ This module ships with several API methods that can be leveraged in code, and a 
     * `front` - a string path to an image. Try to keep this image card-shaped.
     * `back` (optional) - a string path to a card back image. If not provided, it will use `modules/orcnog-card-viewer/assets/orcnogback.webp`
     * `border` (optional) - a string (hex value) representing a custom border color. Ex: "#000"
-    * `faceDown` (optional) - boolean, whether the card will display face-down (default is true)
 
     ### Returns:
     * a newly created FancyDisplay instance
@@ -102,8 +102,7 @@ This module ships with several API methods that can be leveraged in code, and a 
     const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({
         front: 'https://i.imgur.com/someAmazingCardFrontImage.jpg`,
         back: 'https://i.imgur.com/someAmazingCardBackImage.jpg`,
-        border: '#990000',
-        faceDown: false
+        border: '#990000'
     });
 
     // and later on...
@@ -136,7 +135,7 @@ This module ships with several API methods that can be leveraged in code, and a 
     ```
 
 * ## .draw( args )
-    
+
     Draws a Card from a given deck. This is a convenience method that simply constructs the same object as `api.CardDealer( options )`, and then automatically calls the `.draw( args )` method on that instance.
 
     Args:
@@ -151,13 +150,13 @@ This module ships with several API methods that can be leveraged in code, and a 
     ```
 
 * ## .view( args )
-    
+
     Peeks at Card from a given deck (but doesn't draw it). This is a convenience method that simply constructs the same object as `api.CardDealer( options )`, and then automatically calls the `.view( args )` method on that instance.
 
     Args:
     * `deckName` {String} - see: api.CardDealer > deckName
     * `card` {String} - the name or ID of the card to view
-    * `faceDown` {Boolean} - whether the card should display face-down (true) or face-up (false)
+    * `isFaceDown` {Boolean} - whether the card should display face-down (true) or face-up (false)
     * `whisper` {Boolean} - whether the card description text should be whispered to the DM
     * `share` {Boolean} (optional) - whether the card will be shared to all players on draw(default is true)
 
@@ -173,7 +172,7 @@ This module ships with several API methods that can be leveraged in code, and a 
     This functionality is experimental at best.  It "works", but I'm having trouble with image sizing, webp/png transparency, and most non-card images tend to look bad with the glint/glare effect.
 
     View any image with the FancyViewer. No border. Can't flip.
-    
+
     This is a (very experimental!) convenience method that simply constructs the same object as would `api.FancyDisplay( options )`, and then automatically calls the `.render( share )` method on it.
 
     Args:
@@ -201,7 +200,7 @@ These functions shuold be accessible at the global level. Use them in macros or 
     front: myFrontImg,
     back: myBackImg,
     border: myCstomBorderColor,
-    faceDown: false
+    isFaceDown: false
     });
 
     // and later on...
