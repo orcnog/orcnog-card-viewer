@@ -166,7 +166,7 @@
 }
 
 .orcnog-card-viewer.has-border .decks-draw__wrp-card {
-    padding: 3%;
+    padding: var(--px-card-border-width) /* 0.5rem; */
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card:hover {
@@ -183,8 +183,8 @@
 
 .orcnog-card-viewer .decks-draw__img-card {
     z-index: 0;
-    max-height: 100%; /* 50vh; */
-    max-width: 100%; /* 60vw; */
+    max-height: 100%;
+    max-width: 100%;
 }
 
 .orcnog-card-viewer .decks-draw__img-card-back {
@@ -195,9 +195,14 @@
     transition: z-index 750ms;
 }
 
+.orcnog-card-viewer.has-border .decks-draw__img-card,
 .orcnog-card-viewer.has-border .decks-draw__img-card-back {
-    width: calc(100% - 6%); /* calc(100% - 2rem); */
-    height: calc(100% - 6%); /* calc(100% - 2rem); */
+    border-radius: 2%;
+}
+
+.orcnog-card-viewer.has-border .decks-draw__img-card-back {
+    width: calc(100% - (var(--px-card-border-width) * 2));
+    height: calc(100% - (var(--px-card-border-width) * 2));
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-sway {

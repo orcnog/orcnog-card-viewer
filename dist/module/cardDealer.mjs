@@ -1,7 +1,7 @@
 import FancyDisplay from './fancyDisplay.mjs';
 
 class CardDealer {
-    constructor(deckName, discardPileName) {
+    constructor({deckName, discardPileName}) {
         this.deckName = null;
         this.deck = null;
         this.pile = null;
@@ -58,12 +58,16 @@ class CardDealer {
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
             // Extract card properties
-            const { id, name, front, back, desc, border } = this._extractCardProperties(drawnCard);
+            const { id, name, front, back, desc } = this._extractCardProperties(drawnCard);
             const showFaceDown = true;
 
             if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
-                new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
+                new FancyDisplay({
+                    imgFrontPath: front,
+                    imgBackPath: back,
+                    faceDown: showFaceDown
+                }).render(shareToAll);
 
                 if (game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM')) {
                     // Whisper the card instructions to the DM
@@ -106,10 +110,14 @@ class CardDealer {
             }
 
             // Extract card properties
-            const { id, name, front, back, desc, border } = this._extractCardProperties(cardToView);
+            const { id, name, front, back, desc } = this._extractCardProperties(cardToView);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
+            new FancyDisplay({
+                imgFrontPath: front,
+                imgBackPath: back,
+                faceDown: showFaceDown
+            }).render(shareToAll);
 
             if (doWhisper) {
                 // Whisper the card instructions to the DM
@@ -175,10 +183,9 @@ class CardDealer {
         const front = card.faces[0].img;
         const back = card.back.img;
         const desc = card.faces[0].text;
-        const border = '#d29a38';
         const faceDown = true;
 
-        return { id, name, front, back, desc, border, faceDown };
+        return { id, name, front, back, desc, faceDown };
     }
 
     _whisperCardInstructions(deckName, cardId, cardName, front, desc) {

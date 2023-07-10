@@ -15,6 +15,15 @@ A quick demo showing how to view a card from a deck, flip it, share it, dismiss 
 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-demo.gif)
 
+# Settings
+* **Enable clickable card icons** - Enable/disable clickable card icons in Sidebar Card Stacks.
+* **Enable display on deal** - Enable/disable displaying cards when they are dealt.
+* **Enable whisper card details to DM** - Enable/disable whispering card details to the DM on view.
+* **Default card border width** - Configure the default border width on displayed cards.
+* **Default card border color** - Configure the default border color on displayed cards.
+* **Default card back image** - Configure the default card back image on displayed cards.
+
+
 # Macros
 You'll need to import all the macros from the compendium in this module and customize them.
 
@@ -92,6 +101,7 @@ This module ships with several API methods that can be leveraged in code, and a 
     * `front` - a string path to an image. Try to keep this image card-shaped.
     * `back` (optional) - a string path to a card back image. If not provided, it will use `modules/orcnog-card-viewer/assets/orcnogback.webp`
     * `border` (optional) - a string (hex value) representing a custom border color. Ex: "#000"
+    * `borderWidth` (optional) - a string (px value) representing a custom border width. Ex: "5px"
     * `faceDown` (optional) - boolean, whether the card will display face-down (default is true)
 
     ### Returns:
@@ -103,6 +113,7 @@ This module ships with several API methods that can be leveraged in code, and a 
         front: 'https://i.imgur.com/someAmazingCardFrontImage.jpg`,
         back: 'https://i.imgur.com/someAmazingCardBackImage.jpg`,
         border: '#990000',
+        borderWidth: '6px',
         faceDown: false
     });
 
@@ -250,3 +261,9 @@ Fixed Issue #10, 'Deck of Many Things' hardcoded. Also added a new GIF demo vide
 
 ## v0.1.5
 Fixed a bug pointed out by @kristianserrano in this PR: https://github.com/orcnog/orcnog-card-viewer/pull/14/files
+
+## v0.1.6
+This release is for testing only!  It's a carbon copy of the v0.1.5 release, but the compatibility is lowered to include v10.
+
+## v0.1.7
+Added game settings for default border color & width and cardback image. Made borderWidth configurable in macros and api calls. Fixed Issue #18.

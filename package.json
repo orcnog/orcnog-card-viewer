@@ -1,6 +1,6 @@
 {
   "name": "orcnog-card-viewer",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "A Foundry VTT module that displays cards in a beautiful 3D-like viewer",
   "main": "dist/init.js",
   "scripts": {
