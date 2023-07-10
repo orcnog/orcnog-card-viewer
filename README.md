@@ -16,7 +16,7 @@ A quick demo showing how to view a card from a deck, flip it, share it, dismiss 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-demo.gif)
 
 # Settings
- * **Enable clickable card icons** - Enable/disable clickable card icons in Sidebar Card Stacks.
+* **Enable clickable card icons** - Enable/disable clickable card icons in Sidebar Card Stacks.
 * **Enable display on deal** - Enable/disable displaying cards when they are dealt.
 * **Enable whisper card details to DM** - Enable/disable whispering card details to the DM on view.
 * **Default card border width** - Configure the default border width on displayed cards.
