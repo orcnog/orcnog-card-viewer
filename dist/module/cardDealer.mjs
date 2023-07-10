@@ -38,15 +38,11 @@ class CardDealer {
         this.initPromiseResolve();
     }
 
-    async draw(share) {
-        await game.settings.set('orcnog-card-viewer', 'share', share);
+    async draw(shareToAll = false) {
         try {
             await this.initPromise;
-
-            const deckName = this.deckName;
             const deck = this.deck;
-            const shareToAll = share;
-
+            await game.settings.set('orcnog-card-viewer', 'shareToAll', shareToAll);
             // At this point, it is mandatory that we have a discard pile.
             // If there's not already a discard pile assigned to THIS, try to match an existing discard pile by name, or just create a new one.
             this.pile = this.pile || _createNewDiscardPile();
@@ -54,21 +50,19 @@ class CardDealer {
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM});
+            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM });
+            const shareToAllDefault = game.settings.settings.get('orcnog-card-viewer.shareToAll').default;
+            await game.settings.set('orcnog-card-viewer', 'shareToAll', shareToAllDefault);
 
-            const drawnCard = pile.cards.contents[pile.cards.size - 1];
-
-            // Extract card properties
-            const { id, name, front, back, desc, border } = this._extractCardProperties(drawnCard);
-            const showFaceDown = true;
+            const card = pile.cards.contents[pile.cards.size - 1];
 
             if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
-                new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
+                new FancyDisplay(card).render(shareToAll);
 
-                if (game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM')) {
+                if (!game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM')) {
                     // Whisper the card instructions to the DM
-                    this._whisperCardInstructions(deckName, id, name, front, desc);
+                    this._whisperCardInstructions(card);
                 }
             }
 
@@ -80,42 +74,26 @@ class CardDealer {
 
     /**
      * View a card (but do not draw it)
-     * @param {string} card This can be the card ID or the card's exact name.
-     * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
+     * @param {string} card This is the card object.
      * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
-     * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
+     * @param {boolean} shareToAll Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns
      */
-    async view(card, faceDown, whisper, share) {
+    async view(card, whisper, shareToAll = false) {
         try {
-            await game.settings.set('orcnog-card-viewer', 'share', share);
+            let cardToDisplay = card;
             const deck = this.deck;
-            const deckName = this.deckName;
-            const showFaceDown = faceDown;
+            if (typeof cardToDisplay === 'string') {
+                cardToDisplay = deck.cards.find((c) => c.name === card);
+            }
             const doWhisper = whisper;
-            const shareToAll = share;
-
-            if (!card) {
-                ui.notifications.warn("Please provide a card name or ID.");
-                return;
-            }
-
-            // Get card by name
-            const cardToView = deck.cards.get(card) || deck.cards.getName(card);
-            if (!cardToView) {
-                ui.notifications.warn("No card by that ID or name was found.");
-                return;
-            }
-
-            // Extract card properties
-            const { id, name, front, back, desc, border } = this._extractCardProperties(cardToView);
 
             // Display with fancy card viewer module
-            new FancyDisplay(front, back, border, showFaceDown).render(shareToAll);
+            new FancyDisplay(cardToDisplay).render(shareToAll);
 
             if (doWhisper) {
                 // Whisper the card instructions to the DM
-                this._whisperCardInstructions(deckName, id, name, front, desc);
+                this._whisperCardInstructions(cardToDisplay);
             }
 
         } catch (error) {
@@ -178,23 +156,24 @@ class CardDealer {
         const back = card.back.img;
         const desc = card.faces[0].text;
         const border = '#d29a38';
-        const faceDown = true;
+        const isFaceDown = true;
 
-        return { id, name, front, back, desc, border, faceDown };
+        return { id, name, front, back, desc, border, isFaceDown };
     }
 
-    _whisperCardInstructions(deckName, cardId, cardName, front, desc) {
+    _whisperCardInstructions(card) {
         const dm = game.users.find(u => u.isGM && u.active);
         if (!dm) {
             ui.notifications.warn("DM user not found.");
             return;
         }
-
-        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-deck="${deckName}" data-card="${cardId}">
-                <img class="card-face" src="${front}" alt="${cardName}" />
-                <h4 class="card-name">${cardName}</h4>
+        const cardImage = card.showFace ? card.faces[card.face].img : card.back.img;
+        const cardText = card.showFace ? card.faces[card.face].text : card.name;
+        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-card="${card.id}">
+                <img class="card-face" src="${cardImage}" alt="${card.name}" />
+                <h4 class="card-name">${card.name}</h4>
             </div>
-            <p>${desc}</p>`;
+            <p>${cardText}</p>`;
 
         ChatMessage.create({ content: messageContent, whisper: [dm._id] });
     }

@@ -1,19 +1,24 @@
+import PsuedoCard from './PseudoCard.mjs';
+
 class FancyDisplay {
-    constructor(imgFrontPath, imgBackPath, border, faceDown) {
-        this.imgFrontPath = imgFrontPath;
-        this.imgBackPath = imgBackPath;
+    constructor(card, border, front, back) {
+        this.card = card;
         this.border = border;
-        this.faceDown = faceDown;
+        this.front = front;
+        this.back = back;
     }
 
     async render(shareToAll) {
         try {
             // Specify the image URL or file path
-            const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
-            const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
-            const borderColor = this.border;
+            let imgFrontPath = this.card?.showFace ? this.card?.faces[this.card?.face]?.img : this.card?.faces[0]?.img;
+            let imgBackPath = this.card?.back?.img;
+            if (!imgFrontPath) {
+                this.card = new PsuedoCard(this.front, this.back);
+                imgFrontPath = this.card.faces[0]?.img;
+                imgBackPath = this.card.back?.img
+            }
             const FancyDisplay = this;
-            const share = shareToAll;
 
             if (imgFrontPath) {
                 // Calculate the canvas viewable area
@@ -24,11 +29,12 @@ class FancyDisplay {
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(front, back, border) {
+                    constructor(card, border, front, back) {
                         super();
-                        this.imgFrontPath = front;
-                        this.imgBackPath = back;
+                        this.card = card;
                         this.border = border;
+                        this.front = front;
+                        this.back = back;
                     }
 
                     static get defaultOptions() {
@@ -57,8 +63,10 @@ class FancyDisplay {
 
                         if (imgBackPath) {
                             const btnFlip = html.querySelector('.orcnog-card-viewer-flip-button');
-                            btnFlip.addEventListener("click", (evt) => {
+                            btnFlip.addEventListener("click", async (evt) => {
                                 evt.stopPropagation();
+                                const card = await fromUuid(evt.currentTarget.dataset.cardUuid);
+                                if (card) await card.flip();
                                 wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
                             });
                         }
@@ -67,10 +75,17 @@ class FancyDisplay {
                             evt.stopPropagation();
                         });
 
-                        shareBtn?.addEventListener("click", (evt) => {
+                        shareBtn?.addEventListener("click", async (evt) => {
                             evt.stopPropagation();
+                            const cardsCurrentlyDisplayed = document.querySelectorAll('.decks-draw__wrp-card');
+                            for (const cardDisplayed of cardsCurrentlyDisplayed) {
+                                if (cardDisplayed.dataset.cardUuid !== '') {
+                                    FancyDisplay._shareToAll(cardDisplayed.dataset.cardUuid);
+                                } else {
+
+                                }
+                            }
                             shareBtn.disabled = true;
-                            FancyDisplay._shareToAll();
                         });
 
                         wrpDrawn.addEventListener("click", (evt) => {
@@ -97,18 +112,18 @@ class FancyDisplay {
                         function _pRenderStgCard_getPerspectiveStyles ({mouseX, mouseY, ele}) {
                             const bcr = ele.getBoundingClientRect();
                             const hView = window.innerHeight;
-                        
+
                             const cCenterX = bcr.left + bcr.width / 2;
                             const cCenterY = bcr.top + bcr.height / 2;
-                        
+
                             const cMouseX = mouseX - cCenterX;
                             const cMouseY = (hView - mouseY) - (hView - cCenterY);
-                        
+
                             const scaleFactor = hView * 2;
-                        
+
                             const rotX = cMouseY / scaleFactor;
                             const rotY = cMouseX / scaleFactor;
-                        
+
                             return {
                                 ..._pRenderStgCard_getPerspectiveStyles_card({mouseX, mouseY, bcr, hView, rotX, rotY}),
                                 ..._pRenderStgCard_getPerspectiveStyles_glint({mouseX, mouseY, bcr, hView, rotX, rotY}),
@@ -124,21 +139,21 @@ class FancyDisplay {
                         function _pRenderStgCard_getPerspectiveStyles_glint ({mouseX, mouseY, bcr, hView, rotX, rotY}) {
                             const cCenterX = bcr.left + bcr.width / 2;
                             const cCenterY = bcr.top + bcr.height / 2;
-                        
+
                             const cMouseX = mouseX - cCenterX;
                             const cMouseY = (hView - mouseY) - (hView - cCenterY);
-                        
+
                             const glintDist = Math.sqrt(Math.pow(cMouseX, 2) + Math.pow(cMouseY, 2));
                             const glintDistRatio = glintDist / hView;
-                        
+
                             const pctLeft = ((mouseX - bcr.left) / bcr.width) * 100;
                             const pctTop = ((mouseY - bcr.top) / bcr.height) * 100;
-                        
+
                             const pctLeftClamped = Math.max(0, Math.min(100, pctLeft));
                             const pctTopClamped = Math.max(0, Math.min(100, pctTop));
-                        
+
                             const glintOpacityFalloff = glintDistRatio * 0.33;
-                        
+
                             const gradSpot = `radial-gradient(
                                 circle at left ${pctLeftClamped}% top ${pctTopClamped}%,
                                 rgba(255, 255, 255, 0.73) 0%,
@@ -147,14 +162,14 @@ class FancyDisplay {
                                 rgba(255, 255, 255, 0.53) ${2 + (glintDistRatio * 2)}%,
                                 transparent ${5 + (glintDistRatio * 13)}%
                             )`;
-                        
+
                             const gradSpotInv = `radial-gradient(
                                 circle at left ${100 - pctLeftClamped}% top ${100 - pctTopClamped}%,
                                 #fff2 0%,
                                 #fff2 ${10 + (glintDistRatio * 2)}%,
                                 transparent ${20 + (glintDistRatio * 5)}%
                             )`;
-                        
+
                             const gradEdge = `linear-gradient(
                                 ${-rotX + rotY}rad,
                                 var(--rgb-card-glint--edge) 0%,
@@ -162,30 +177,33 @@ class FancyDisplay {
                                 transparent 96%,
                                 var(--rgb-card-glint--edge) 100%
                             )`;
-                        
+
                             return {
                                 glintBackground: `${gradSpot}, ${gradSpotInv}, ${gradEdge}`,
                             };
                         }
-                    } 
+                    }
 
                     getData() {
                         const data = super.getData();
                         data.isGM = game.user.isGM;
-                        data.showShareBtn = !share;
-                        data.imgFront = this.imgFrontPath;
-                        data.imgBack = this.imgBackPath;
+                        if (this.card) {
+                            data.card = this.card;
+                        } else {
+                            data.card = new PsuedoCard(front, back);
+                        }
+                        data.showShareBtn = !shareToAll;
                         data.borderColor = this.border;
                         data.glintColor = FancyDisplay._adjustToGlintColor(this.border);
                         return data;
                     }
                 }
 
-                const customPopout = new CustomPopout(imgFrontPath, imgBackPath, borderColor);
+                const customPopout = new CustomPopout(this.card, this.border);
                 customPopout.render(true);
 
                 // Check if the user is the GM
-                if (share && game.user.isGM) {
+                if (shareToAll && this.card?.faces?.length > 0 && game.user.isGM) {
                     this._shareToAll();
                 }
 
@@ -197,16 +215,15 @@ class FancyDisplay {
         }
     }
 
-    _shareToAll () {
+    _shareToAll(cardUuid = this.card?.uuid) {
         // Emit a socket message to all players
         game.socket.emit('module.orcnog-card-viewer', {
             type: 'VIEWCARD',
             payload: {
-                imgFrontPath: this.imgFrontPath,
-                imgBackPath: this.imgBackPath,
+                cardUuid: this.card?.uuid,
                 border: this.border,
-                faceDown: this.faceDown,
-                shareToAll: true
+                front: this.front,
+                back: this.back
             }
         });
     }
@@ -224,7 +241,7 @@ class FancyDisplay {
 
     _convertHexToHSL (color) {
         let r, g, b;
-      
+
         if (color.startsWith("#")) {
           // Hexadecimal color
           let hex = color.slice(1);
@@ -241,11 +258,11 @@ class FancyDisplay {
         } else {
           throw new Error("Invalid color format");
         }
-      
+
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
         let h, s, l = (max + min) / 2;
-      
+
         if (max === min) {
           h = 6.2069;
           s = 0; // achromatic
@@ -259,10 +276,14 @@ class FancyDisplay {
           }
           h /= 6;
         }
-      
+
         return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
-    }      
+    }
 
 }
 
 export default FancyDisplay;
+
+Handlebars.registerHelper("getFaceImg", function (card) {
+    return card.face ? card.faces[card.face].img : card.faces[0].img;
+});

@@ -17,6 +17,33 @@ export const registerSettings = function() {
         default: true,
         type: Boolean
     });
+    // Enable/disable displaying cards when they are drawn.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnDraw', {
+        name: "Enable display on draw.",
+        hint: "Enable/disable displaying cards when they are drawn from a deck.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable displaying cards when they are passed.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnPassToHand', {
+        name: "Enable display on pass to hand.",
+        hint: "Enable/disable displaying cards when they are passed to a hand.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable displaying cards when they are passed to a pile.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnPassToPile', {
+        name: "Enable display on pass to pile.",
+        hint: "Enable/disable displaying cards when they are passed to a pile.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
     // Enable/disable whispering card details to the DM on view.
     game.settings.register('orcnog-card-viewer', 'enableWhisperCardTextToDM', {
         name: "Enable whisper card details to DM.",
@@ -27,20 +54,12 @@ export const registerSettings = function() {
         type: Boolean
     });
     // Enable/disable whispering card details to the DM on view.
-    game.settings.register('orcnog-card-viewer', 'share', {
-        name: "Share Card to Chat",
-        hint: "Determines whether or not to share the card to chat.",
+    game.settings.register('orcnog-card-viewer', 'shareToAll', {
+        name: "Render FancyDisplay for everyone",
+        hint: "This is a hidden programmatic setting for determining whether or not to display a card to everyone using FancyDisplay.",
         scope: 'world',
         config: false,
-        default: true,
-        type: Boolean
-    });
-    game.settings.register('orcnog-card-viewer', 'view', {
-        name: "View Card(s)",
-        hint: "Determines whether or not to view the cards for a given action.",
-        scope: 'world',
-        config: false,
-        default: true,
+        default: false,
         type: Boolean
     });
 };

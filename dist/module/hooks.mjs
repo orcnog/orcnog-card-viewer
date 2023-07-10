@@ -8,6 +8,7 @@ import { registerSettings } from './settings.mjs';
 import { preloadTemplates } from './preloadTemplates.mjs';
 import FancyDisplay from './fancyDisplay.mjs';
 import CardDealer from './cardDealer.mjs';
+import PseudoCard from './PseudoCard.mjs';
 
 /**
  * Registers hooks needed throughout the module
@@ -43,8 +44,8 @@ export default function registerHooks() {
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardNameOrID, true, true, true);`
-            view: function (deckName, card, faceDown, whisper, share) {
-                new CardDealer(deckName).view(card, faceDown, whisper, share);
+            view: function (deckName, card, whisper, share) {
+                new CardDealer(deckName).view(card, whisper, share);
             },
             // View an image. (no border, can't flip)
             // WARNING: Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect
@@ -59,8 +60,8 @@ export default function registerHooks() {
             },
             // Create a FancyDisplay instance and expose the whole thing
             // Example: `const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({ front: imgPath });`
-            FancyDisplay: function ({ front, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) { // #d29a38
-                return new FancyDisplay(front, back, border, faceDown);
+            FancyDisplay: function ({ card, border = '#da6'}) { // #d29a38
+                return new FancyDisplay(card, border);
             },
             // Create a CardDealer instance and expose the whole thing
             // Example: `const myFancyDealer = await game.modules.get('orcnog-card-viewer').api.CardDealer({ deckName: 'My Deck' });`
@@ -77,8 +78,8 @@ export default function registerHooks() {
         console.log('orcnog-card-viewer: initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.OrcnogFancyDisplay = function ({ front = null, back = 'modules/orcnog-card-viewer/assets/orcnogback.webp', border = '#da6', faceDown = true }) {
-            return new FancyDisplay(front, back, border, faceDown);
+        globalThis.OrcnogFancyDisplay = function ({ card, border = '#da6', front, back }) {
+            return new FancyDisplay(card, border, front, back);
         };
 
         // Expose the CardDealer constructor as a global function for macros and such
@@ -89,17 +90,24 @@ export default function registerHooks() {
         // Construct a FancyDisplay for just a simple image
         // WARNING! Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect.
         globalThis.OrcnogFancyImage = function (image) {
-            return new FancyDisplay(image, null, null, null);
+            return new FancyDisplay(image, null);
         };
 
-        function handleCardViewerSocketEvent({ type, payload }) {
+        async function handleCardViewerSocketEvent({ type, payload, front, back }) {
             switch (type) {
                 case 'VIEWCARD': {
-                    const cardView = new FancyDisplay(payload.imgFrontPath, payload.imgBackPath, payload.border, payload.faceDown, payload.share);
-                    cardView.render();
+
+                    let card = payload.cardUuid ? await fromUuid(payload.cardUuid) : undefined;
+                    /* if (!card) {
+                        card = new PseudoCard(payload.front, payload.back);
+                    } */
+                    const cardView = new FancyDisplay(card, payload.border, payload.front, payload.back);
+                        cardView.render();
+                    break;
                 }
                 case 'INITIALIZED': {
                     console.log('orcnog-card-viewer: initialized');
+                    break;
                 }
                 default:
                     throw new Error('unknown type');
@@ -123,13 +131,12 @@ export default function registerHooks() {
 
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
-        $card_icon.on('click.orcnog_card_viewer', (event) => {
+        $card_icon.on('click.orcnog_card_viewer', async (event) => {
             const id = $(event.target).closest('.card').data('card-id');
-            const deckCard = data.cards.find(c => c._id === id);
-            const faceDown = deckCard.face === null;
+            const card = data.cards.find(c => c._id === id);
             const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
             const shareToAll = false;
-            if (id) new CardDealer(deckCard.source.name).view(id, faceDown, whisper, shareToAll);
+            if (id) new CardDealer(card.parent.name).view(card, whisper, shareToAll);
         });
 
         // TODO: Drag to canvas
@@ -146,10 +153,11 @@ export default function registerHooks() {
         $message.on('click.orcnog_card_viewer', 'img.card-face', (event) => {
             const deckName = $(event.target).closest('.orcnog-card-viewer-msg').data('deck');
             const cardName = $(event.target).closest('.orcnog-card-viewer-msg').data('card');
-            const faceDown = false;
+            const deck = game.cards.getName(deckName);
+            const card = deck.cards.find(c => c.name === cardName);
             const whisper = false;
             const shareToAll = false;
-            if (deckName && cardName) new CardDealer(deckName).view(cardName, faceDown, whisper, shareToAll);
+            if (deckName && cardName) new CardDealer(deckName).view(card, whisper, shareToAll);
         });
 
         // TODO: Drag to canvas
@@ -157,25 +165,65 @@ export default function registerHooks() {
     });
 
     Hooks.on('dealCards', (origin, destinations, context) => {
+        let doView = false;
+        if (context.action === 'deal') {
+            doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal');
+        } else if (context.action === 'pass') {
+            if (origin.type === 'hand' && destinations[0].type === 'pile') {
+                doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnPassToPile');
+            } else if ((origin.type === 'hand' || origin.type === 'pile') && destinations[0].type === 'hand') {
+                doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnPassToHand');
+            }
+        }
         // Exit early if necessary;
-        if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) return;
         if (context.toCreate.length === 0) return;
+        if (!doView) return;
 
-        // Show any and all cards that were dealt
-        // TODO: show multiple cards in one render (instead of multiple renders)
-        // Temporary TODO^ fix: on click of background, close all popped up cards.
-        const viewer = new CardDealer(origin.name);
-        context.toCreate.forEach(dest => {
-            dest.forEach(card => {
-                const faceDown = true;
-                const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
-                const shareToAll = game.settings.get('orcnog-card-viewer', 'share')
-                const doView = game.settings.get('orcnog-card-viewer', 'view');
-                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
-            });
-        });
+        for (const dest of context.toCreate) {
+            for (const card of dest) {
+                if (card.flags['orcnog-card-viewer']) {
+                    card.flags['orcnog-card-viewer'].doView = doView;
+                } else {
+                    card.flags['orcnog-card-viewer'] = { doView: doView };
+                }
+            }
+        }
     });
 
+    Hooks.on('passCards', async (origin, destination, context) => {
+        let doView = false;
+        if (context.action === 'pass'){
+            if (origin.type === 'hand' && destination.type === 'pile') {
+                doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnPassToPile');
+            } else if ((origin.type === 'hand' || origin.type === 'pile') && destination.type === 'hand') {
+                doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnPassToHand');
+            }
+        } else if (context.action === 'draw'){
+            doView = game.settings.get('orcnog-card-viewer', 'enableDisplayOnDraw');
+        } else {
+            doView = false;
+        }
+        // Exit early if necessary;
+        if (!doView) return;
+        if (context.toCreate.length === 0) return;
+
+        for (const card of context.toCreate) {
+            if (card.flags['orcnog-card-viewer']) {
+                card.flags['orcnog-card-viewer'].doView = doView;
+            } else {
+                card.flags['orcnog-card-viewer'] = { doView: doView };
+            }
+        }
+    });
+
+    Hooks.on('createCard', async (card, options, userId) => {
+        const doView = card.getFlag('orcnog-card-viewer', 'doView');
+        if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnPassToHand')) return;
+        if (!doView) return;
+        const viewer = new CardDealer(card.parent.name);
+        const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
+        if (doView && card.isOwner) viewer.view(card, whisper, game.settings.get('orcnog-card-viewer', 'shareToAll'));
+    });
     // Hooks.on('getCardsDirectoryEntryContext', (html, itemDropDowns) => { }
 
     // Note:  this syntax worked to catch ANY renderApplication hook:
@@ -186,8 +234,6 @@ export default function registerHooks() {
 
 //TODO: BUG FIX - when multiple cards are shared (e.g. multiple cards are DEALT and automatically shared simultaneouly), the Show to Players button is buggy
 // Possible Solution: make the Show to Players button always share all currently-displayed cards / images simultaneouly?  Not sure.
-
-//TODO: show card on DRAW and PASS (currently it's on DEAL macro click).  Add settings to enable/disable this.
 
 //TODO: make the FancyDisplay constructor take a config object, rather than multiple params in order
 
