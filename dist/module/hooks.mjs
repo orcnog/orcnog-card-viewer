@@ -134,6 +134,8 @@ export default function registerHooks() {
         });
     });
 
+    // View on card image click in a stack window
+
     Hooks.on('renderApplication', (app, $html, data) => {
         // Exit early if necessary;
         if (!game.settings.get('orcnog-card-viewer', 'enableCardIconClick')) return;
@@ -151,10 +153,10 @@ export default function registerHooks() {
                 deckName: deckCard.source.name
             }).view(id, faceDown, whisper, shareToAll);
         });
-
-        // TODO: Drag to canvas
-        // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+        // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
+
+    // View on card image click in chat messages
 
     Hooks.on('renderChatMessage', (app, $html, data) => {
         // Exit early if necessary;
@@ -177,6 +179,8 @@ export default function registerHooks() {
         // TODO: Drag to canvas
         // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
+
+    // View on card deal
 
     Hooks.on('dealCards', (origin, destinations, context) => {
         // Exit early if necessary;
@@ -213,8 +217,6 @@ export default function registerHooks() {
 
 //TODO: show card on DRAW and PASS (currently it's on DEAL macro click).  Add settings to enable/disable this.
 
-//TODO: Set a default card back image if none is provided yet display is definitely in a "card" context.
-
 //TODO: Add more custom macro icons to /assets?
 
 //TODO: Support non-card images...
@@ -224,8 +226,6 @@ export default function registerHooks() {
     //TODO: Add simple image macros back once support is satisfactory.
 
 //TODO: Stretch goal - Anything that has a click-to-show, shuold also support drag-to-canvas.
-
-//TODO: Stretch goal - set up a module setting to let the user choose the default card back image? Include ability to define a URL.
 
 //TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 

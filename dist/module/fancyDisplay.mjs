@@ -196,7 +196,7 @@ class FancyDisplay {
                 }
 
             } else {
-                ui.notifications.warn("Image URL or file path not provided.");
+                ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.imagePathNotProvded")); // "Image URL or file path not provided.");
             }
         } catch (error) {
             console.error("Error rendering FancyPopout:", error);
