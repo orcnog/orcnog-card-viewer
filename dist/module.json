@@ -4,7 +4,7 @@
   "title": "Card Viewer",
   "description": "",
   "systems": [],
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "https://github.com/orcnog/orcnog-card-viewer/blob/master/LICENSE",
   "readme": "https://github.com/orcnog/orcnog-card-viewer/blob/master/README.md",
   "bugs": "https://github.com/orcnog/orcnog-card-viewer/issues",
@@ -40,6 +40,6 @@
   ],
   "socket": true,
   "url": "https://github.com/orcnog/orcnog-card-viewer/",
-  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.7/module.json",
-  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.7/orcnog-card-viewer-v0.1.7.zip"
+  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.8/module.json",
+  "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.1.8/orcnog-card-viewer-v0.1.8.zip"
 }
