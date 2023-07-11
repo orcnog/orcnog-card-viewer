@@ -1,7 +1,7 @@
 <div class="orcnog-card-viewer {{#if hasBorder}}has-border{{/if}}" style="--rgb-card-glint--edge: {{#if glintColor}}{{glintColor}}{{else}}transparent{{/if}}; --rgb-card-border-color: {{borderColor}}; --px-card-border-width: {{borderWidth}};">
     <div class="decks-draw__stg ve-flex-vh-center decks-draw__stg--visible">
         {{#if isGM}}
-            {{#if showShareBtn}}<button class="orcnog-card-viewer-share-btn" data-tooltip="Show to Players"><i class="fas fa-eye"></i></button>{{/if}}
+            {{#if showShareBtn}}<button class="orcnog-card-viewer-share-btn" data-tooltip="{{localize 'ORCNOG_CARD_VIEWER.ui.showToPlayersButtonLabel'}}"><i class="fas fa-eye"></i></button>{{/if}}
         {{/if}}
         <div class="ve-flex-v-center mobile__ve-flex-col">
             <div class="ve-flex-col no-select relative">

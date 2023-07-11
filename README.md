@@ -8,13 +8,15 @@ After setting up a deck of many things in one of my games, I found there wasn't 
 None
 
 ## Compatibility
-This was built on Foundry v11 and, based on initial user feedback, appears to be currently incompatible with v10 or earlier.  As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
+This was built on Foundry v11 and, based on initial user feedback, appears to be currently mostly compatible with v10 but may have some bugs. As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any issues in v10 or with mother modules, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
 
 ## Demo
+
 A demo showing how to view a card from a deck, flip it, share it, dismiss it, and what output to expect in the DM chat:
 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-demo.gif)
 
+___
 A quick demo showcasing 2 macros that will draw a random card from a given deck and discard it, or peek at a card without drawing it:
 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-macro-demo.gif)
@@ -25,7 +27,7 @@ A quick demo showcasing 2 macros that will draw a random card from a given deck 
 * **Enable whisper card details to DM** - Enable/disable whispering card details to the DM on view.
 * **Default card border width** - Configure the default border width on displayed cards.
 * **Default card border color** - Configure the default border color on displayed cards.
-* **Default card back image** - Configure the default card back image on displayed cards.
+* **Default card back image** - Configure the default card back image on images viewed as cards.
 
 
 # Macros
@@ -274,3 +276,6 @@ This release is for testing only!  It's a carbon copy of the v0.1.5 release, but
 
 ## v0.1.7
 Added game settings for default border color & width and cardback image. Made borderWidth configurable in macros and api calls. Fixed Issue #18.
+
+## v0.1.8
+Completes localization or all client-facing or language-functional strings. Attempts to fix `.deal()` erroring out.
