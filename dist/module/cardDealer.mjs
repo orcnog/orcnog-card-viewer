@@ -53,7 +53,11 @@ class CardDealer {
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM, action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal' });
+            await deck.deal([pile], 1, {
+                how: CONST.CARD_DRAW_MODES.RANDOM,
+                action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal',
+                chatNotification: false
+            });
 
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
 
