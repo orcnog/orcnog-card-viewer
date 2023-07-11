@@ -47,7 +47,7 @@ export const registerSettings = function() {
     // Configure default card back image.
     game.settings.register('orcnog-card-viewer', 'defaultCardBackImage', {
         name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.name"), // "Default card back image",
-        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.hint"), // "Configure the default card back image for displayed cards.",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.hint"), // "Configure the default card back image on images viewed as cards.",
         scope: 'world',
         config: true,
         default: 'modules/orcnog-card-viewer/assets/cardbacks/orcnogback.webp',
