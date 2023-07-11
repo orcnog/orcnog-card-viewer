@@ -11,9 +11,13 @@ None
 This was built on Foundry v11 and, based on initial user feedback, appears to be currently incompatible with v10 or earlier.  As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
 
 ## Demo
-A quick demo showing how to view a card from a deck, flip it, share it, dismiss it, and what output to expect in the DM chat:
+A demo showing how to view a card from a deck, flip it, share it, dismiss it, and what output to expect in the DM chat:
 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-demo.gif)
+
+A quick demo showcasing 2 macros that will draw a random card from a given deck and discard it, or peek at a card without drawing it:
+
+![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-macro-demo.gif)
 
 # Settings
 * **Enable clickable card icons** - Enable/disable clickable card icons in Sidebar Card Stacks.
@@ -69,22 +73,25 @@ OrcnogFancyCardDealer({
 
 1. Replace 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp' with a path or URL to any image you want.
 2. You can replace 'modules/orcnog-card-viewer/assets/orcnogback.webp' with a path or URL to any card back image.
-3. cardBorder can change the border color.
-4. shareToAll will show to everyone.
+3. borderColor can change the border color.
+4. borderWidth can change the colored border thickness.
+5. shareToAll will show to everyone.
 
 ```
 // Requires Orcnog's Card Viewer
 // This macro demonstrates the easiest way to view any image (URL or local path) as a flippable card. The card back image is automatically provided.
 
 let img = 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp';
-let backImg = 'modules/orcnog-card-viewer/assets/orcnogback.webp'; // optional
-let cardBorder = '#da6'; // optional
-let shareToAll = true;
+let backImg = 'https://i.imgur.com/mStOCso.png'; // optional
+let borderColor = '#543'; // optional
+let borderWidth = '5px'; // optional
+let shareToAll = true; // optional
 
 OrcnogFancyDisplay({
    front: img,
    back: backImg,
-   border: cardBorder
+   border: borderColor,
+   borderWidth: borderWidth
 }).render(shareToAll)
 ```
 
