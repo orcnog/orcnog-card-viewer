@@ -17,6 +17,42 @@ export const registerSettings = function() {
         default: true,
         type: Boolean
     });
+    // Enable/disable displaying cards when they are drawn.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnDraw', {
+        name: "Enable display on draw.",
+        hint: "Enable/disable displaying cards when they are drawn from a deck.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable displaying cards when they are passed.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnPassToHand', {
+        name: "Enable display on pass to hand.",
+        hint: "Enable/disable displaying cards when they are passed to a hand.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable displaying cards when they are passed to a pile.
+    game.settings.register('orcnog-card-viewer', 'enableDisplayOnPassToPile', {
+        name: "Enable display on pass to pile.",
+        hint: "Enable/disable displaying cards when they are passed to a pile.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable whispering card details to the DM on view.
+    game.settings.register('orcnog-card-viewer', 'enableWhisperCardTextToDM', {
+        name: "Enable whisper card details to DM.",
+        hint: "Enable/disable whispering card details to the DM on view.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
     // Enable/disable whispering card details to the DM on view.
     game.settings.register('orcnog-card-viewer', 'enableWhisperCardTextToDM', {
         name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.name"), // "Enable whisper card details to DM",
