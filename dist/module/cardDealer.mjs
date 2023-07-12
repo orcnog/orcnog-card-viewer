@@ -1,24 +1,24 @@
 import FancyDisplay from './fancyDisplay.mjs';
 
 class CardDealer {
-    constructor(deckName, discardPileName) {
+    constructor({deckName, discardPileName}) {
         this.deckName = null;
         this.deck = null;
         this.pile = null;
 
         this.initPromise = new Promise((resolve) => {
-            this.initPromiseResolve = resolve;
+            this._initPromiseResolve = resolve;
         });
 
-        this.initialize(deckName, discardPileName)
+        this._initialize(deckName, discardPileName)
             .catch((error) => {
                 console.error("Error initializing CardDealer:", error);
             });
     }
 
-    async initialize(deckName, discardPileName) {
+    async _initialize(deckName, discardPileName) {
         if (!deckName) {
-            ui.notifications.warn("Deck name not provided.");
+            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.deckNameNotProvided")); // "Deck name not provided."
             return;
         }
 
@@ -27,7 +27,7 @@ class CardDealer {
         // Get the deck by name
         const deck = game.cards.getName(deckName);
         if (!deck) {
-            ui.notifications.warn("No deck by that name was found.");
+            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.deckNotFound")); // "No deck by that name was found."
             return;
         }
 
@@ -35,7 +35,7 @@ class CardDealer {
         this.pile = await this._getDiscardPile(discardPileName); // may return null. at this point a discard pile is not mandatory though.
 
         // Resolve the initialization promise to indicate completion
-        this.initPromiseResolve();
+        this._initPromiseResolve();
     }
 
     async draw(shareToAll = false) {
@@ -45,14 +45,16 @@ class CardDealer {
             await game.settings.set('orcnog-card-viewer', 'shareToAll', shareToAll);
             // At this point, it is mandatory that we have a discard pile.
             // If there's not already a discard pile assigned to THIS, try to match an existing discard pile by name, or just create a new one.
-            this.pile = this.pile || _createNewDiscardPile();
+            if (!this.pile) this.pile = await this._createNewDiscardPile();
 
             const pile = this.pile;
 
             // Deal 1 random card and grab reference to the dealt card
-            await deck.deal([pile], 1, { how: CONST.CARD_DRAW_MODES.RANDOM });
-            const shareToAllDefault = game.settings.settings.get('orcnog-card-viewer.shareToAll').default;
-            await game.settings.set('orcnog-card-viewer', 'shareToAll', shareToAllDefault);
+            await deck.deal([pile], 1, {
+                how: CONST.CARD_DRAW_MODES.RANDOM,
+                action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal',
+                chatNotification: false
+            });
 
             const card = pile.cards.contents[pile.cards.size - 1];
 
@@ -79,7 +81,7 @@ class CardDealer {
      * @param {boolean} shareToAll Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns
      */
-    async view(card, whisper, shareToAll = false) {
+    async view(card, whisper, shareToAll) {
         try {
             let cardToDisplay = card;
             const deck = this.deck;
@@ -114,7 +116,7 @@ class CardDealer {
             pile = game.cards.getName(discardPileName);
             // If that didn't work, create a new discard pile by the name provided.
             if (!pile) {
-                ui.notifications.warn(`No pile found by the name "${discardPileName}". Creating a new discard pile by that name.`);
+                ui.notifications.warn(game.i18n.format("ORCNOG_CARD_VIEWER.notification.pileNotFoundWillCreate", {"pileName": discardPileName})); // `No pile found by the name "${discardPileName}". Creating a new discard pile by that name.`
                 pile = await Cards.create({ name: discardPileName, type: "pile" });
             }
         }
@@ -123,17 +125,17 @@ class CardDealer {
 
     // Create a new discard pile by deck name.
     async _createNewDiscardPile(discardPileName) {
-        const newPileName = discardPileName || `${this.deckName} - Discard Pile`;
+        const newPileName = discardPileName || `${this.deckName} - ${game.i18n.localize("ORCNOG_CARD_VIEWER.ui.discardPileLabel")}`;
         const pile = this.pile || await Cards.create({ name: newPileName, type: "pile" });
         return pile;
     }
 
     _smartMatchDiscardName(name) {
         // Words that can be ignored when attempting to match the deck name to a potential discard pile's name
-        const stopwords = ["deck", "cards", "card", "of", "in", "on", "the", "a", "an"];
+        const stopwords = game.i18n.localize("ORCNOG_CARD_VIEWER.ui.ignoreWordsInDeckNameForDiscardPileMatch").split(/\s*,\s*/); // ["the", "thy", "a", "an", "in", "on", "of", "for", "de", "le", "la", "el", "los", "las", "deck", "cards", "card"]
 
         // Words that, if matched in a card stack's name, signify that it is potentially a discard pile
-        const matchwordsOr = ["discard", "drawn", "played", "used"];
+        const matchwordsOr = game.i18n.localize("ORCNOG_CARD_VIEWER.ui.keyWordsToIdentifyDiscardPile").split(/\s*,\s*/); // ["discard", "drawn", "played", "used"];
 
         const namePattern = new RegExp(name.replace(new RegExp(`\\b(?:${stopwords.join("|")})\\b\\s*`, "gi"), ""), "i");
         const discardPattern = new RegExp(`(?:${matchwordsOr.join("|")})`, "i");
@@ -156,7 +158,7 @@ class CardDealer {
         const back = card.back.img;
         const desc = card.faces[0].text;
         const border = '#d29a38';
-        const isFaceDown = true;
+        const faceDown = true;
 
         return { id, name, front, back, desc, border, isFaceDown };
     }
@@ -164,7 +166,7 @@ class CardDealer {
     _whisperCardInstructions(card) {
         const dm = game.users.find(u => u.isGM && u.active);
         if (!dm) {
-            ui.notifications.warn("DM user not found.");
+            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.gmNotFound")); //"GM user not found."
             return;
         }
         const cardImage = card.showFace ? card.faces[card.face].img : card.back.img;

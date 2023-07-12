@@ -8,12 +8,27 @@ After setting up a deck of many things in one of my games, I found there wasn't 
 None
 
 ## Compatibility
-This was built on Foundry v11 and, based on initial user feedback, appears to be currently incompatible with v10 or earlier.  As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
+This was built on Foundry v11 and, based on initial user feedback, appears to be currently mostly compatible with v10 but may have some bugs. As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any issues in v10 or with mother modules, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
 
 ## Demo
-A quick demo showing how to view a card from a deck, flip it, share it, dismiss it, and what output to expect in the DM chat:
+
+A demo showing how to view a card from a deck, flip it, share it, dismiss it, and what output to expect in the DM chat:
 
 ![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-demo.gif)
+
+___
+A quick demo showcasing 2 macros that will draw a random card from a given deck and discard it, or peek at a card without drawing it:
+
+![Demo of orcnog-card-viewer module](demo/orcnog-card-viewer-macro-demo.gif)
+
+# Settings
+* **Enable clickable card icons** - Enable/disable clickable card icons in Sidebar Card Stacks.
+* **Enable display on deal** - Enable/disable displaying cards when they are dealt.
+* **Enable whisper card details to DM** - Enable/disable whispering card details to the DM on view.
+* **Default card border width** - Configure the default border width on displayed cards.
+* **Default card border color** - Configure the default border color on displayed cards.
+* **Default card back image** - Configure the default card back image on images viewed as cards.
+
 
 # Macros
 You'll need to import all the macros from the compendium in this module and customize them.
@@ -60,23 +75,24 @@ OrcnogFancyCardDealer({
 
 1. Replace 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp' with a path or URL to any image you want.
 2. You can replace 'modules/orcnog-card-viewer/assets/orcnogback.webp' with a path or URL to any card back image.
-3. cardBorder can change the border color.
-4. shareToAll will show to everyone.
+3. borderColor can change the border color.
+4. borderWidth can change the colored border thickness.
+5. shareToAll will show to everyone.
 
 ```
 // Requires Orcnog's Card Viewer
 // This macro demonstrates the easiest way to view any image (URL or local path) as a flippable card. The card back image is automatically provided.
 
 let img = 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp';
-let backImg = 'modules/orcnog-card-viewer/assets/orcnogback.webp'; // optional
-let cardBorder = '#da6'; // optional
-let shareToAll = true;
+let backImg = 'https://i.imgur.com/mStOCso.png'; // optional
+let borderColor = '#543'; // optional
+let borderWidth = '5px'; // optional
+let shareToAll = true; // optional
 
 OrcnogFancyDisplay({
    card: null,
-   border: cardBorder,
-   front: img,
-   back: backImg
+   borderColor: borderColor,
+   borderWidth: borderWidth
 }).render(shareToAll)
 ```
 
@@ -90,9 +106,9 @@ This module ships with several API methods that can be leveraged in code, and a 
     Expose the FancyDisplay constructor globally for modules and macros and such.
 
     ### Options:
-    * `front` - a string path to an image. Try to keep this image card-shaped.
-    * `back` (optional) - a string path to a card back image. If not provided, it will use `modules/orcnog-card-viewer/assets/orcnogback.webp`
-    * `border` (optional) - a string (hex value) representing a custom border color. Ex: "#000"
+    * `card` - a Card Document or an image path.
+    * `borderColor` (optional) - a string (hex value) representing a custom border color. Ex: "#000"
+    * `borderWidth` (optional) - a string (px value) representing a custom border width. Ex: "5px"
 
     ### Returns:
     * a newly created FancyDisplay instance
@@ -100,9 +116,10 @@ This module ships with several API methods that can be leveraged in code, and a 
     ### Example:
     ```
     const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({
-        front: 'https://i.imgur.com/someAmazingCardFrontImage.jpg`,
+        card: card,
         back: 'https://i.imgur.com/someAmazingCardBackImage.jpg`,
-        border: '#990000'
+        borderColor: '#990000',
+        borderWidth: '6px'
     });
 
     // and later on...
@@ -154,10 +171,9 @@ This module ships with several API methods that can be leveraged in code, and a 
     Peeks at Card from a given deck (but doesn't draw it). This is a convenience method that simply constructs the same object as `api.CardDealer( options )`, and then automatically calls the `.view( args )` method on that instance.
 
     Args:
-    * `deckName` {String} - see: api.CardDealer > deckName
-    * `card` {String} - the name or ID of the card to view
+    * `card` {Object} - the Card Document of the card to view
     * `whisper` {Boolean} - whether the card description text should be whispered to the DM
-    * `share` {Boolean} (optional) - whether the card will be shared to all players on draw(default is true)
+    * `shareToAll` {Boolean} (optional) - whether the card will be shared to all players on draw(default is true)
 
     Example:
 
@@ -176,7 +192,7 @@ This module ships with several API methods that can be leveraged in code, and a 
 
     Args:
     * `image` {String} - string path to an image. can be local, or a URL.
-    * `share` {Boolean} (optional) - whether the image will be immediately shared to all players (default is true)
+    * `shareToAll` {Boolean} (optional) - whether the image will be immediately shared to all players (default is true)
 
     Example:
 
@@ -247,3 +263,12 @@ Fixed Issue #10, 'Deck of Many Things' hardcoded. Also added a new GIF demo vide
 
 ## v0.1.5
 Fixed a bug pointed out by @kristianserrano in this PR: https://github.com/orcnog/orcnog-card-viewer/pull/14/files
+
+## v0.1.6
+This release is for testing only!  It's a carbon copy of the v0.1.5 release, but the compatibility is lowered to include v10.
+
+## v0.1.7
+Added game settings for default border color & width and cardback image. Made borderWidth configurable in macros and api calls. Fixed Issue #18.
+
+## v0.1.8
+Completes localization or all client-facing or language-functional strings. Attempts to fix `.deal()` erroring out.

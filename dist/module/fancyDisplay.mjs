@@ -1,11 +1,12 @@
 import PsuedoCard from './PseudoCard.mjs';
 
 class FancyDisplay {
-    constructor(card, border, front, back) {
+    constructor(card, borderColor, borderWidth, front, back) {
         this.card = card;
-        this.border = border;
         this.front = front;
         this.back = back;
+        this.borderColor = borderColor;
+        this.borderWidth = borderWidth;
     }
 
     async render(shareToAll) {
@@ -19,22 +20,24 @@ class FancyDisplay {
                 imgBackPath = this.card.back?.img
             }
             const FancyDisplay = this;
+            if (!this.imgBackPath) this.imgBackPath = game.settings.get('orcnog-card-viewer', 'defaultCardBackImage');
+            const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
+            const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
 
             if (imgFrontPath) {
-                // Calculate the canvas viewable area
-                const sidebarWidth = ui.sidebar.position.width;
-                const controlsWidth = ui.controls.position.width;
-                const dialogWidth = "100vw"; //window.innerWidth - (controlsWidth + sidebarWidth);
+                const dialogWidth = "100vw";
                 const dialogHeight = "100vh";
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(card, border, front, back) {
+                    constructor(card, borderColor, borderWidth, front, back) {
                         super();
                         this.card = card;
-                        this.border = border;
+                        this.borderColor = borderColor;
                         this.front = front;
                         this.back = back;
+                        this.borderWidth = borderWidth;
+                        this.borderColor = borderColor;
                     }
 
                     static get defaultOptions() {
@@ -54,7 +57,7 @@ class FancyDisplay {
                     }
 
                     async jsEvents (html) {
-                        // JS manipulation - 95 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
+                        // JS manipulation - 85 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
                         const wrpDrawn = html.querySelector('.decks-draw__stg');
                         const dispGlint = html.querySelector('.decks-draw__disp-glint');
                         const wrpCard = html.querySelector('.decks-draw__wrp-card');
@@ -124,9 +127,12 @@ class FancyDisplay {
                             const rotX = cMouseY / scaleFactor;
                             const rotY = cMouseX / scaleFactor;
 
+                            const glintEdgeSpreadTop = parseInt(borderWidth) == 0 ? 110 : 100;
+                            const glintEdgeSpreadBottom = parseInt(borderWidth) == 0 ? -10 : 0;
+
                             return {
                                 ..._pRenderStgCard_getPerspectiveStyles_card({mouseX, mouseY, bcr, hView, rotX, rotY}),
-                                ..._pRenderStgCard_getPerspectiveStyles_glint({mouseX, mouseY, bcr, hView, rotX, rotY}),
+                                ..._pRenderStgCard_getPerspectiveStyles_glint({mouseX, mouseY, bcr, hView, rotX, rotY, glintEdgeSpreadTop, glintEdgeSpreadBottom}),
                             };
                         }
 
@@ -136,7 +142,7 @@ class FancyDisplay {
                             };
                         }
 
-                        function _pRenderStgCard_getPerspectiveStyles_glint ({mouseX, mouseY, bcr, hView, rotX, rotY}) {
+                        function _pRenderStgCard_getPerspectiveStyles_glint ({mouseX, mouseY, bcr, hView, rotX, rotY, glintEdgeSpreadTop, glintEdgeSpreadBottom}) {
                             const cCenterX = bcr.left + bcr.width / 2;
                             const cCenterY = bcr.top + bcr.height / 2;
 
@@ -172,10 +178,10 @@ class FancyDisplay {
 
                             const gradEdge = `linear-gradient(
                                 ${-rotX + rotY}rad,
-                                var(--rgb-card-glint--edge) 0%,
+                                var(--rgb-card-glint--edge) ${glintEdgeSpreadBottom}%,
                                 transparent 4%,
                                 transparent 96%,
-                                var(--rgb-card-glint--edge) 100%
+                                var(--rgb-card-glint--edge) ${glintEdgeSpreadTop}%
                             )`;
 
                             return {
@@ -193,14 +199,15 @@ class FancyDisplay {
                             data.card = new PsuedoCard(front, back);
                         }
                         data.showShareBtn = !shareToAll;
-                        data.borderColor = this.border;
-                        data.glintColor = FancyDisplay._adjustToGlintColor(this.border);
+                        data.hasBorder = parseInt(this.borderWidth) !== 0;
+                        data.borderColor = this.borderColor;
+                        data.borderWidth = this.borderWidth;
+                        data.glintColor = FancyDisplay._adjustToGlintColor(this.borderColor, );
                         return data;
                     }
                 }
 
-                const customPopout = new CustomPopout(this.card, this.border);
-                customPopout.render(true);
+                new CustomPopout(this.card, this.borderColor, this.borderWidth).render(true);
 
                 // Check if the user is the GM
                 if (shareToAll && this.card?.faces?.length > 0 && game.user.isGM) {
@@ -208,7 +215,7 @@ class FancyDisplay {
                 }
 
             } else {
-                ui.notifications.warn("Image URL or file path not provided.");
+                ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.imagePathNotProvded")); // "Image URL or file path not provided.");
             }
         } catch (error) {
             console.error("Error rendering FancyPopout:", error);
@@ -221,22 +228,25 @@ class FancyDisplay {
             type: 'VIEWCARD',
             payload: {
                 cardUuid: this.card?.uuid,
-                border: this.border,
                 front: this.front,
-                back: this.back
+                back: this.back,
+                borderColor: this.borderColor,
+                borderWidth: this.borderWidth,
+                shareToAll: true
             }
         });
     }
 
     _adjustToGlintColor (color) {
-        if (!color) return null;
+        if (!color || color == 'transparent') return null;
         const Y = 58; // yellow
         const [H, S, L] = this._convertHexToHSL(color);
         // const newH = (H + Y) / 2;
         const newH = (H > (Y+10) ? H-10 : H < (Y-10) ? H+10 : Y); // bring H up to 10 clicks closer to the number 58
         const newS = Math.pow(S, 1.08); // up the saturation exponentially ^1.08
         const newL = (L*10 + 100) / 11; // up the lightness by 9-ish percent
-        return `hsl(${Math.round(newH)}, ${Math.round(newS)}%, ${Math.round(newL)}%)`;
+        const alpha = '100';
+        return `hsl(${Math.round(newH)} ${Math.round(newS)}% ${Math.round(newL)}% / ${alpha})`;
     }
 
     _convertHexToHSL (color) {
@@ -278,6 +288,38 @@ class FancyDisplay {
         }
 
         return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+    }
+
+    _getBorderWidth (input) {
+        let bwidth;
+        if (input == '0' || input == 'none') {
+            // any zero value should be explicitly "0px" for CSS calc() purposes
+            bwidth = '0px';
+        } else if (input == null) {
+            // no value provided? get the default from game settings. fallback to 8px
+            bwidth = game.settings.get('orcnog-card-viewer', 'defaultCardBorderWidth') || '8px';
+        } else if (!isNaN(Number(input))) {
+            // assume unitless number is a pixel value
+            bwidth = input + 'px';
+        } else {
+            // assume a complex NaN string is some valid css value (e.g. '1rem', '15px', '2%', etc). If not, it's their own fault >=|
+            bwidth = input;
+        }
+        return bwidth;
+    }
+
+    _getBorderColor (input, borderWidth) {
+        let bcolor;
+        if (input) {
+            bcolor = input;
+        } else if (parseInt(borderWidth) == 0) {
+            // If no border setting this will at least give us some color to the glint edge effect.
+            bcolor = '#fff296'; // #fff296 is the approx color of the sparkle floaties in the background.
+        } else {
+            // no value provided? get the default from game settings. fallback to #d29a38
+            bcolor = game.settings.get('orcnog-card-viewer', 'defaultCardBorderColor') || '#d29a38';
+        }
+        return bcolor;
     }
 
 }
