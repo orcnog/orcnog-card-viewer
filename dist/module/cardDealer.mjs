@@ -1,3 +1,5 @@
+import { MODULE_ID, MODULE_SHORT, MODULE_L18N_PREFIX } from "./consts.mjs";
+import { LogUtility } from "./log.mjs";
 import FancyDisplay from './fancyDisplay.mjs';
 
 class CardDealer {
@@ -12,13 +14,13 @@ class CardDealer {
 
         this._initialize(deckName, discardPileName)
             .catch((error) => {
-                console.error("Error initializing CardDealer:", error);
+                LogUtility.error("Error initializing CardDealer:", error);
             });
     }
 
     async _initialize(deckName, discardPileName) {
         if (!deckName) {
-            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.deckNameNotProvided")); // "Deck name not provided."
+            LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.deckNameNotProvided")); // "Deck name not provided."
             return;
         }
 
@@ -27,7 +29,7 @@ class CardDealer {
         // Get the deck by name
         const deck = game.cards.getName(deckName);
         if (!deck) {
-            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.deckNotFound")); // "No deck by that name was found."
+            LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.deckNotFound")); // "No deck by that name was found."
             return;
         }
 
@@ -55,7 +57,7 @@ class CardDealer {
             // Deal 1 random card and grab reference to the dealt card
             await deck.deal([pile], 1, {
                 how: CONST.CARD_DRAW_MODES.RANDOM,
-                action: shareToAll ? 'deal orcnog_card_viewer_doshare' : 'deal',
+                action: shareToAll ? `deal ${MODULE_SHORT}_doshare` : 'deal',
                 chatNotification: false
             });
 
@@ -65,7 +67,7 @@ class CardDealer {
             const { id, name, front, back, desc } = this._extractCardProperties(drawnCard);
             const showFaceDown = true;
 
-            if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) {
+            if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
                 new FancyDisplay({
                     imgFrontPath: front,
@@ -73,7 +75,7 @@ class CardDealer {
                     faceDown: showFaceDown
                 }).render(shareToAll);
 
-                if (game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM')) {
+                if (game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM')) {
                     // Whisper the card instructions to the DM
                     this._whisperCardInstructions(deckName, id, name, front, desc);
                 }
@@ -81,7 +83,7 @@ class CardDealer {
 
 
         } catch (error) {
-            console.error("Error rendering CardDraw.draw():", error);
+            LogUtility.error("Error rendering CardDraw.draw():", error);
         }
     }
 
@@ -102,14 +104,14 @@ class CardDealer {
             const shareToAll = share;
 
             if (!card) {
-                ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.cardIdNotProvided")); // "Please provide a card name or ID."
+                LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardIdNotProvided")); // "Please provide a card name or ID."
                 return;
             }
 
             // Get card by name
             const cardToView = deck.cards.get(card) || deck.cards.getName(card);
             if (!cardToView) {
-                ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.cardNotFound")); // "No card by that ID or name was found."
+                LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
                 return;
             }
 
@@ -129,7 +131,7 @@ class CardDealer {
             }
 
         } catch (error) {
-            console.error("Error rendering CardView.view():", error);
+            LogUtility.error("Error rendering CardView.view():", error);
         }
     }
 
@@ -140,13 +142,13 @@ class CardDealer {
             // If no name provided, then lookup piles and try to smart-match by deck name.
             const matchedPileName = this._smartMatchDiscardName(this.deckName);
             pile = game.cards.getName(matchedPileName);
-            if (pile) console.warn(`No discard pile name provided. Found a discard pile named "${matchedPileName}", which will be used.`);
+            if (pile) LogUtility.warn(`No discard pile name provided. Found a discard pile named "${matchedPileName}", which will be used.`);
         } else {
             // Try to get an existing discard pile by the name provided
             pile = game.cards.getName(discardPileName);
             // If that didn't work, create a new discard pile by the name provided.
             if (!pile) {
-                ui.notifications.warn(game.i18n.format("ORCNOG_CARD_VIEWER.notification.pileNotFoundWillCreate", {"pileName": discardPileName})); // `No pile found by the name "${discardPileName}". Creating a new discard pile by that name.`
+                LogUtility.warn(game.i18n.format(MODULE_L18N_PREFIX + ".notification.pileNotFoundWillCreate", {"pileName": discardPileName})); // `No pile found by the name "${discardPileName}". Creating a new discard pile by that name.`
                 pile = await Cards.create({ name: discardPileName, type: "pile" });
             }
         }
@@ -155,17 +157,17 @@ class CardDealer {
 
     // Create a new discard pile by deck name.
     async _createNewDiscardPile(discardPileName) {
-        const newPileName = discardPileName || `${this.deckName} - ${game.i18n.localize("ORCNOG_CARD_VIEWER.ui.discardPileLabel")}`;
+        const newPileName = discardPileName || `${this.deckName} - ${game.i18n.localize(MODULE_L18N_PREFIX + ".ui.discardPileLabel")}`;
         const pile = this.pile || await Cards.create({ name: newPileName, type: "pile" });
         return pile;
     }
 
     _smartMatchDiscardName(name) {
         // Words that can be ignored when attempting to match the deck name to a potential discard pile's name
-        const stopwords = game.i18n.localize("ORCNOG_CARD_VIEWER.ui.ignoreWordsInDeckNameForDiscardPileMatch").split(/\s*,\s*/); // ["the", "thy", "a", "an", "in", "on", "of", "for", "de", "le", "la", "el", "los", "las", "deck", "cards", "card"]
+        const stopwords = game.i18n.localize(MODULE_L18N_PREFIX + ".ui.ignoreWordsInDeckNameForDiscardPileMatch").split(/\s*,\s*/); // ["the", "thy", "a", "an", "in", "on", "of", "for", "de", "le", "la", "el", "los", "las", "deck", "cards", "card"]
 
         // Words that, if matched in a card stack's name, signify that it is potentially a discard pile
-        const matchwordsOr = game.i18n.localize("ORCNOG_CARD_VIEWER.ui.keyWordsToIdentifyDiscardPile").split(/\s*,\s*/); // ["discard", "drawn", "played", "used"];
+        const matchwordsOr = game.i18n.localize(MODULE_L18N_PREFIX + ".ui.keyWordsToIdentifyDiscardPile").split(/\s*,\s*/); // ["discard", "drawn", "played", "used"];
 
         const namePattern = new RegExp(name.replace(new RegExp(`\\b(?:${stopwords.join("|")})\\b\\s*`, "gi"), ""), "i");
         const discardPattern = new RegExp(`(?:${matchwordsOr.join("|")})`, "i");
@@ -173,7 +175,7 @@ class CardDealer {
 
         for (const [deckId, deck] of game.cards.entries()) {
             if ((namePattern.test(deck.name) && discardPattern.test(deck.name)) || fallbackPattern.test(deck.name)) {
-                console.log(`Discard Pile found for deck "${name}":`, deck.name);
+                LogUtility.log(`Discard Pile found for deck "${name}":`, deck.name);
                 return deck.name;
             }
         }
@@ -195,11 +197,11 @@ class CardDealer {
     _whisperCardInstructions(deckName, cardId, cardName, front, desc) {
         const dm = game.users.find(u => u.isGM && u.active);
         if (!dm) {
-            ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.gmNotFound")); //"GM user not found."
+            LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.gmNotFound")); //"GM user not found."
             return;
         }
 
-        const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-deck="${deckName}" data-card="${cardId}">
+        const messageContent = `<div class="card-draw ${MODULE_ID}-msg flexrow" data-deck="${deckName}" data-card="${cardId}">
                 <img class="card-face" src="${front}" alt="${cardName}" />
                 <h4 class="card-name">${cardName}</h4>
             </div>
