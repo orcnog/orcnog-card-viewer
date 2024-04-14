@@ -4,11 +4,6 @@
 export const MODULE_ID = "orcnog-card-viewer";
 
 /**
- * String identifier for the module used throughout other scripts, underscore-delimited.
- */
-export const MODULE_ID_UNDERSCORES = "orcnog_card_viewer";
-
-/**
  * Full title string of the module.
  */
 export const MODULE_TITLE = "Card Viewer";

@@ -208,8 +208,8 @@ export default function registerHooks() {
             dest.forEach(card => {
                 const faceDown = true;
                 const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes(`${MODULE_ID_UNDERSCORES}_doshare`);
-                const doView = !context.action.includes(`${MODULE_ID_UNDERSCORES}_noshow`);
+                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
                 if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });
