@@ -1,5 +1,6 @@
 import { MODULE_ID, MODULE_L18N_PREFIX } from "./consts.mjs";
 import { LogUtility } from "./log.mjs";
+import { CardViewerSocket } from './hooks.mjs';
 
 class FancyDisplay {
     constructor({imgFrontPath, imgBackPath, borderColor, borderWidth, faceDown}) {
@@ -209,16 +210,14 @@ class FancyDisplay {
 
     _shareToAll () {
         // Emit a socket message to all players
-        game.socket.emit(`module.${MODULE_ID}`, {
-            type: 'VIEWCARD',
-            data: {
-                imgFrontPath: this.imgFrontPath,
-                imgBackPath: this.imgBackPath,
-                borderColor: this.borderColor,
-                borderWidth: this.borderWidth,
-                faceDown: this.faceDown,
-                shareToAll: true
-            }
+        LogUtility.log('You shared your card with everyone.')
+        CardViewerSocket.executeForOthers('ShareToAll', {
+            imgFrontPath: this.imgFrontPath,
+            imgBackPath: this.imgBackPath,
+            borderColor: this.borderColor,
+            borderWidth: this.borderWidth,
+            faceDown: this.faceDown,
+            shareToAll: true
         });
     }
 

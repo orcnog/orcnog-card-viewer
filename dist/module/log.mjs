@@ -13,6 +13,14 @@ export class LogUtility {
     }
 
     /**
+     * Sends an debug log to the console.
+     * @param {String} logString The string to log as an info. 
+     */
+    static debug(logString) {
+        console.debug(..._processLog(logString));
+    }
+
+    /**
      * Sends an error log to the console and displays an error UI notification.
      * @param {String} logString The string to log as an error. 
      */

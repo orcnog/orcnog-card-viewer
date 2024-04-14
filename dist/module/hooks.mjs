@@ -4,7 +4,7 @@
  */
 
 // Import JavaScript modules
-import { MODULE_ID, MODULE_SHORT } from "./consts.mjs";
+import { MODULE_ID, MODULE_SHORT, MODULE_TITLE } from "./consts.mjs";
 import { registerSettings } from './settings.mjs';
 import { preloadTemplates } from './preloadTemplates.mjs';
 import { LogUtility } from "./log.mjs";
@@ -12,9 +12,38 @@ import FancyDisplay from './fancyDisplay.mjs';
 import CardDealer from './cardDealer.mjs';
 
 /**
+ * Exported socket object
+ */
+export let CardViewerSocket = {
+    executeForEveryone: () => {
+        LogUtility.error(`socketlib is required for ${MODULE_TITLE} to work properly. Please install and enable the socketlib module.`)
+    },
+    executeForOthers: () => {
+        LogUtility.error(`socketlib is required for ${MODULE_TITLE} to work properly. Please install and enable the socketlib module.`)
+    }
+};
+
+/**
  * Registers hooks needed throughout the module
  */
 export default function registerHooks() {
+    /* ------------------------------------ */
+    /* Setup socketlib stuff                */
+    /* ------------------------------------ */
+
+    Hooks.once("socketlib.ready", () => {
+        CardViewerSocket = socketlib.registerModule(MODULE_ID);
+        CardViewerSocket.register("ShareToAll", (data) => {
+            LogUtility.log('ShareToAll hook fired');
+            new FancyDisplay({
+                ...data
+            }).render(data.share);
+        });
+        CardViewerSocket.register("Ready", () => {
+            LogUtility.log('Card Viewer ready.');
+        });
+    });
+
     /* ------------------------------------ */
     /* Initialize module                    */
     /* ------------------------------------ */
@@ -27,25 +56,7 @@ export default function registerHooks() {
         await preloadTemplates();
 
         // Register custom sheets (if any)
-        
-        // Set up custom module-specific hooks        
-        game.socket.on(`module.${MODULE_ID}`, async (payload) => {
-            LogUtility.log('Ready');
-            switch (payload.type) {
-                case 'VIEWCARD': {
-                    new FancyDisplay({
-                        ...payload.data
-                    }).render(payload.data.share);
-                    break;
-                }
-                case 'READY': {
-                    LogUtility.log('Ready');
-                    break;
-                }
-                default:
-                    throw new Error('unknown type');
-            }
-        });
+
     });
 
     /* ------------------------------------ */
@@ -130,11 +141,8 @@ export default function registerHooks() {
 
         // Emit hook on init complete
         // Usage: game.socket.on('module.orcnog-card-viewer', ({ type, payload }) => type === 'INITIALIZED' && /* do stuff */);
-        LogUtility.log('Firing \'READY\' hook.')
-        game.socket.emit(`module.${MODULE_ID}`, {
-            type: 'READY',
-            data: {}
-        });
+        LogUtility.log(`Firing 'READY' hook.`)
+        CardViewerSocket.executeForEveryone("Ready", null);
     });
 
     // View on card image click in a stack window
@@ -146,7 +154,7 @@ export default function registerHooks() {
       
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
-        $card_icon.on(`click.ocv`, (event) => {
+        $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
             const id = $(event.target).closest('.card').data('card-id');
             const deckCard = data.cards.find(c => c._id === id);
             const faceDown = deckCard.face === null;
@@ -168,7 +176,7 @@ export default function registerHooks() {
 
         // Register card icon click handler
         const $message = $html.find(`.${MODULE_ID}-msg`);
-        $message.on(`click.ocv`, 'img.card-face', (event) => {
+        $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
             const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
             const cardName = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
             const faceDown = false;
@@ -200,8 +208,8 @@ export default function registerHooks() {
             dest.forEach(card => {
                 const faceDown = true;
                 const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes('orcnog_card_viewer_doshare');
-                const doView = !context.action.includes('orcnog_card_viewer_noshow');
+                const shareToAll = context.action.includes(`${MODULE_ID_UNDERSCORES}_doshare`);
+                const doView = !context.action.includes(`${MODULE_ID_UNDERSCORES}_noshow`);
                 if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });

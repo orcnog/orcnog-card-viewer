@@ -21,6 +21,14 @@
   "styles": [
     "orcnog-card-viewer.css"
   ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "socketlib",
+        "type": "module"
+      }
+    ]
+  },
   "packs": [
     {
       "name": "macros",
