@@ -34,7 +34,9 @@ class CardDealer {
         }
 
         this.deck = deck;
-        this.pile = await this._getDiscardPile(discardPileName); // may return null. at this point a discard pile is not mandatory though.
+        if (discardPileName) {
+            this.pile = await this._getDiscardPile(discardPileName); // may return null. at this point a discard pile is not mandatory though.
+        }
 
         // Resolve the initialization promise to indicate completion
         this._initPromiseResolve();

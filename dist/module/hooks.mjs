@@ -192,18 +192,20 @@ export default function registerHooks() {
         // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
 
-    // View on card deal
+    // View on card "Deal" action
 
     Hooks.on('dealCards', (origin, destinations, context) => {
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && context.action === 'deal') return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
         if (context.toCreate.length === 0) return;
       
         // Show any and all cards that were dealt
         // TODO: show multiple cards in one render (instead of multiple renders)
         // Temporary TODO^ fix: on click of background, close all popped up cards.
         const viewer = new CardDealer({
-            deckName: origin.name
+            deckName: origin.name,
+            discardPileName: destinations.length ? destinations[0].name : null
         });
         context.toCreate.forEach(dest => {
             dest.forEach(card => {
@@ -216,18 +218,39 @@ export default function registerHooks() {
         });
     });
 
-    // Hooks.on('getCardsDirectoryEntryContext', (html, itemDropDowns) => { }
+    // View on card "Draw" action performed within a "Hand" stack
 
-    // Note:  this syntax worked to catch ANY renderApplication hook:
-    // Hooks.on('renderApplication', (...args) => {
-    //    console.log(...args);
-    // });
+    Hooks.on('passCards', (origin, destinations, context) => {
+        // Exit early if necessary;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDrawToHand') && context.action === 'draw') return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
+        if (context.toCreate.length === 0) return;
+      
+        // Show any and all cards that were dealt
+        // TODO: show multiple cards in one render (instead of multiple renders)
+        // Temporary TODO^ fix: on click of background, close all popped up cards.
+        const viewer = new CardDealer({
+            deckName: origin.name,
+            discardPileName: destinations instanceof Cards ? destinations.name : destinations.length ? destinations[0].name : null
+        });
+        context.toCreate.forEach(dest => {
+            let drawnCards = dest;
+            if (dest instanceof Array === false) drawnCards = [dest];
+            drawnCards.forEach(card => {
+                const faceDown = true;
+                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
+                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
+            });
+        });
+    });
 }
 
 //TODO: BUG FIX - when multiple cards are shared (e.g. multiple cards are DEALT and automatically shared simultaneouly), the Show to Players button is buggy
 // Possible Solution: make the Show to Players button always share all currently-displayed cards / images simultaneouly?  Not sure.
 
-//TODO: show card on DRAW and PASS (currently it's on DEAL macro click).  Add settings to enable/disable this.
+//TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
 
 //TODO: Add more custom macro icons to /assets?
 
