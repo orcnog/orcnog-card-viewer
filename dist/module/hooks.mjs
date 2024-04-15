@@ -196,14 +196,16 @@ export default function registerHooks() {
 
     Hooks.on('dealCards', (origin, destinations, context) => {
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && context.action === 'deal') return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
         if (context.toCreate.length === 0) return;
       
         // Show any and all cards that were dealt
         // TODO: show multiple cards in one render (instead of multiple renders)
         // Temporary TODO^ fix: on click of background, close all popped up cards.
         const viewer = new CardDealer({
-            deckName: origin.name
+            deckName: origin.name,
+            discardPileName: destinations.length ? destinations[0].name : null
         });
         context.toCreate.forEach(dest => {
             dest.forEach(card => {
