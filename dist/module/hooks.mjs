@@ -34,13 +34,14 @@ export default function registerHooks() {
     Hooks.once("socketlib.ready", () => {
         CardViewerSocket = socketlib.registerModule(MODULE_ID);
         CardViewerSocket.register("ShareToAll", (data) => {
-            LogUtility.log('ShareToAll hook fired');
+            LogUtility.debug('ShareToAll hook fired');
             new FancyDisplay({
                 ...data
             }).render(data.share);
         });
         CardViewerSocket.register("Ready", () => {
-            LogUtility.log('Card Viewer ready.');
+            LogUtility.debug('Ready hook fired');
+            LogUtility.log('Ready');
         });
     });
 
@@ -141,7 +142,7 @@ export default function registerHooks() {
 
         // Emit hook on init complete
         // Usage: game.socket.on('module.orcnog-card-viewer', ({ type, payload }) => type === 'INITIALIZED' && /* do stuff */);
-        LogUtility.log(`Firing 'READY' hook.`)
+        LogUtility.debug(`Firing 'READY' hook.`)
         CardViewerSocket.executeForEveryone("Ready", null);
     });
 
@@ -236,7 +237,9 @@ export default function registerHooks() {
     //TODO: Add options to remove glint affects (for non-card images)
     //TODO: Add simple image macros back once support is satisfactory.
 
-//TODO: Stretch goal - Anything that has a click-to-show, shuold also support drag-to-canvas.
+//TODO: Stretch Goal - Dramatic reveal card flip.  Let the sharer control when the card is flipped for all other viewers.
+
+//TODO: Stretch goal - Anything that has a click-to-show, should also support drag-to-canvas.
 
 //TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 

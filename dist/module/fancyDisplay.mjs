@@ -48,7 +48,7 @@ class FancyDisplay {
                     }
 
                     activateListeners (html) {
-                        LogUtility.log("popout has rendered")
+                        LogUtility.debug("A popout was rendered.")
                         this.jsEvents(html[0]);
                     }
 
@@ -210,7 +210,7 @@ class FancyDisplay {
 
     _shareToAll () {
         // Emit a socket message to all players
-        LogUtility.log('You shared your card with everyone.')
+        LogUtility.debug(`Firing 'ShareToAll' hook.`)
         CardViewerSocket.executeForOthers('ShareToAll', {
             imgFrontPath: this.imgFrontPath,
             imgBackPath: this.imgBackPath,
@@ -219,6 +219,7 @@ class FancyDisplay {
             faceDown: this.faceDown,
             shareToAll: true
         });
+        LogUtility.log('You shared your card with everyone.')
     }
 
     _adjustToGlintColor (color) {

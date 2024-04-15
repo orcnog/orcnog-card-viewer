@@ -175,7 +175,7 @@ class CardDealer {
 
         for (const [deckId, deck] of game.cards.entries()) {
             if ((namePattern.test(deck.name) && discardPattern.test(deck.name)) || fallbackPattern.test(deck.name)) {
-                LogUtility.log(`Discard Pile found for deck "${name}":`, deck.name);
+                LogUtility.debug(`Discard Pile found for deck "${name}":`, deck.name);
                 return deck.name;
             }
         }
