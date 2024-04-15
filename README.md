@@ -5,7 +5,7 @@
 After setting up a deck of many things in one of my games, I found there wasn't great out-of-the-box way to simply view and share a card.  Taking visual inspiration from a popular 5e toolset, I ported their card viewer UX over to the Foundry system.  Now, I can view cards beautifully in a 3d-feel viewer, flip the cards over to view the card art or read the card stats, and even share this beautiful view with my players on the fly.
 
 ## Dependencies
-None
+[socketlib](https://foundryvtt.com/packages/socketlib)
 
 ## Compatibility
 This was built on Foundry v11 and, based on initial user feedback, appears to be currently mostly compatible with v10 but may have some bugs. As for compatibility with other modules, none have been tested, but the functionality of this mod doesn't mess with the core card system and only serves to enhance the UI in exactly one way, so I doubt there will be many conflicts. If you come across any issues in v10 or with mother modules, please feel free to log in the github [issues section](https://github.com/orcnog/orcnog-card-viewer/issues).
@@ -279,3 +279,6 @@ Added game settings for default border color & width and cardback image. Made bo
 
 ## v0.1.8
 Completes localization or all client-facing or language-functional strings. Attempts to fix `.deal()` erroring out.
+
+## v0.2.0
+Handle for Pass and Draw (to a hand) actions, with new settings to handle whether those trigger card views. Module now depends on socketlib. Moevs several values to a new CONSTS file. Fixed an annoyance where it searched for a discard pile every time, even if just viewing a card.

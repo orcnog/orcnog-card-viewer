@@ -1,6 +1,5 @@
 node_modules
-foundryconfig.json
 /releases
-versionbump.js
-playtest.py
 /archive
+/ignore
+.env.local
