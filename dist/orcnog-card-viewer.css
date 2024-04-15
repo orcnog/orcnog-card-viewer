@@ -236,7 +236,7 @@
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__disp-glint {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg); /* reverses the glint effects when flipped. */
 }
 
 .chat-sidebar .orcnog-card-viewer-msg img.card-face,

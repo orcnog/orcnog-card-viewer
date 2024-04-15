@@ -1,18 +1,50 @@
 /**
- * A Foundry Virtual Tabletop module to make deck cards displayable in fancy, foaty, sparkly image popout.
+ * A Foundry Virtual Tabletop module to make deck cards displayable in fancy, floaty, sparkly image popout.
  * Author: orcnog
  */
 
 // Import JavaScript modules
+import { MODULE_ID, MODULE_SHORT, MODULE_TITLE } from "./consts.mjs";
 import { registerSettings } from './settings.mjs';
 import { preloadTemplates } from './preloadTemplates.mjs';
+import { LogUtility } from "./log.mjs";
 import FancyDisplay from './fancyDisplay.mjs';
 import CardDealer from './cardDealer.mjs';
+
+/**
+ * Exported socket object
+ */
+export let CardViewerSocket = {
+    executeForEveryone: () => {
+        LogUtility.error(`socketlib is required for ${MODULE_TITLE} to work properly. Please install and enable the socketlib module.`)
+    },
+    executeForOthers: () => {
+        LogUtility.error(`socketlib is required for ${MODULE_TITLE} to work properly. Please install and enable the socketlib module.`)
+    }
+};
 
 /**
  * Registers hooks needed throughout the module
  */
 export default function registerHooks() {
+    /* ------------------------------------ */
+    /* Setup socketlib stuff                */
+    /* ------------------------------------ */
+
+    Hooks.once("socketlib.ready", () => {
+        CardViewerSocket = socketlib.registerModule(MODULE_ID);
+        CardViewerSocket.register("ShareToAll", (data) => {
+            LogUtility.debug('ShareToAll hook fired');
+            new FancyDisplay({
+                ...data
+            }).render(data.share);
+        });
+        CardViewerSocket.register("Ready", () => {
+            LogUtility.debug('Ready hook fired');
+            LogUtility.log('Ready');
+        });
+    });
+
     /* ------------------------------------ */
     /* Initialize module                    */
     /* ------------------------------------ */
@@ -25,6 +57,7 @@ export default function registerHooks() {
         await preloadTemplates();
 
         // Register custom sheets (if any)
+
     });
 
     /* ------------------------------------ */
@@ -32,10 +65,10 @@ export default function registerHooks() {
     /* ------------------------------------ */
     Hooks.once('setup', function () {
         // Do anything after initialization but before ready
-        game.modules.get('orcnog-card-viewer').state = {
+        game.modules.get(MODULE_ID).state = {
             cardsCurrentlyDisplayed: []
         };
-        game.modules.get('orcnog-card-viewer').api = {
+        game.modules.get(MODULE_ID).api = {
             // Draw a card
             // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true);`
             draw: function (deckName, discardPileName, share) {
@@ -93,13 +126,13 @@ export default function registerHooks() {
     /* When ready                           */
     /* ------------------------------------ */
     Hooks.once('ready', function () {
-        console.log('orcnog-card-viewer: initializing');
+        LogUtility.log('Initializing');
 
         // Expose the FancyDisplay constructor as a global function for macros and such
-        globalThis.OrcnogFancyDisplay = game.modules.get('orcnog-card-viewer').api.FancyDisplay;
+        globalThis.OrcnogFancyDisplay = game.modules.get(MODULE_ID).api.FancyDisplay;
 
         // Expose the CardDealer constructor as a global function for macros and such
-        globalThis.OrcnogFancyCardDealer = game.modules.get('orcnog-card-viewer').api.CardDealer;
+        globalThis.OrcnogFancyCardDealer = game.modules.get(MODULE_ID).api.CardDealer;
 
         // Construct a FancyDisplay for just a simple image
         // WARNING! Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect.
@@ -107,47 +140,26 @@ export default function registerHooks() {
             return new FancyDisplay({ imgFrontPath: image });
         };
 
-        function handleCardViewerSocketEvent({ type, payload }) {
-            switch (type) {
-                case 'VIEWCARD': {
-                    new FancyDisplay({
-                        ...payload
-                    }).render(payload.share);
-                    break;
-                }
-                case 'INITIALIZED': {
-                    console.log('orcnog-card-viewer: initialized');
-                    break;
-                }
-                default:
-                    throw new Error('unknown type');
-            }
-        }
-
-        game.socket.on('module.orcnog-card-viewer', handleCardViewerSocketEvent);
-
         // Emit hook on init complete
         // Usage: game.socket.on('module.orcnog-card-viewer', ({ type, payload }) => type === 'INITIALIZED' && /* do stuff */);
-        game.socket.emit('module.orcnog-card-viewer', {
-            type: 'INITIALIZED',
-            payload: {}
-        });
+        LogUtility.debug(`Firing 'READY' hook.`)
+        CardViewerSocket.executeForEveryone("Ready", null);
     });
 
     // View on card image click in a stack window
 
     Hooks.on('renderApplication', (app, $html, data) => {
         // Exit early if necessary;
-        if (!game.settings.get('orcnog-card-viewer', 'enableCardIconClick')) return;
+        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
         if (app instanceof CardsConfig !== true) return;
       
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
-        $card_icon.on('click.orcnog_card_viewer', (event) => {
+        $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
             const id = $(event.target).closest('.card').data('card-id');
             const deckCard = data.cards.find(c => c._id === id);
             const faceDown = deckCard.face === null;
-            const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
+            const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
             const shareToAll = false;
             if (id) new CardDealer({
                 deckName: deckCard.source.name
@@ -160,14 +172,14 @@ export default function registerHooks() {
 
     Hooks.on('renderChatMessage', (app, $html, data) => {
         // Exit early if necessary;
-        if (!game.settings.get('orcnog-card-viewer', 'enableCardIconClick')) return;
-        if (!$html.find('.message-content .orcnog-card-viewer-msg').length) return;
+        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
+        if (!$html.find(`.message-content .${MODULE_ID}-msg`).length) return;
 
         // Register card icon click handler
-        const $message = $html.find('.orcnog-card-viewer-msg');
-        $message.on('click.orcnog_card_viewer', 'img.card-face', (event) => {
-            const deckName = $(event.target).closest('.orcnog-card-viewer-msg').data('deck');
-            const cardName = $(event.target).closest('.orcnog-card-viewer-msg').data('card');
+        const $message = $html.find(`.${MODULE_ID}-msg`);
+        $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
+            const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
+            const cardName = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
             const faceDown = false;
             const whisper = false;
             const shareToAll = false;
@@ -184,7 +196,7 @@ export default function registerHooks() {
 
     Hooks.on('dealCards', (origin, destinations, context) => {
         // Exit early if necessary;
-        if (!game.settings.get('orcnog-card-viewer', 'enableDisplayOnDeal')) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) return;
         if (context.toCreate.length === 0) return;
       
         // Show any and all cards that were dealt
@@ -196,9 +208,9 @@ export default function registerHooks() {
         context.toCreate.forEach(dest => {
             dest.forEach(card => {
                 const faceDown = true;
-                const whisper = game.settings.get('orcnog-card-viewer', 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes('orcnog_card_viewer_doshare');
-                const doView = !context.action.includes('orcnog_card_viewer_noshow');
+                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
                 if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
             });
         });
@@ -225,7 +237,9 @@ export default function registerHooks() {
     //TODO: Add options to remove glint affects (for non-card images)
     //TODO: Add simple image macros back once support is satisfactory.
 
-//TODO: Stretch goal - Anything that has a click-to-show, shuold also support drag-to-canvas.
+//TODO: Stretch Goal - Dramatic reveal card flip.  Let the sharer control when the card is flipped for all other viewers.
+
+//TODO: Stretch goal - Anything that has a click-to-show, should also support drag-to-canvas.
 
 //TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 

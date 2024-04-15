@@ -1,3 +1,7 @@
+import { MODULE_ID, MODULE_L18N_PREFIX } from "./consts.mjs";
+import { LogUtility } from "./log.mjs";
+import { CardViewerSocket } from './hooks.mjs';
+
 class FancyDisplay {
     constructor({imgFrontPath, imgBackPath, borderColor, borderWidth, faceDown}) {
         this.imgFrontPath = imgFrontPath;
@@ -11,7 +15,7 @@ class FancyDisplay {
         try {
             // Specify the image URL or file path
             const FancyDisplay = this;
-            if (!this.imgBackPath) this.imgBackPath = game.settings.get('orcnog-card-viewer', 'defaultCardBackImage');
+            if (!this.imgBackPath) this.imgBackPath = game.settings.get(MODULE_ID, 'defaultCardBackImage');
             const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
             const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
@@ -34,7 +38,7 @@ class FancyDisplay {
 
                     static get defaultOptions() {
                         return mergeObject(super.defaultOptions, {
-                            template: "modules/orcnog-card-viewer/templates/orcnog-card-viewer.html",
+                            template: `modules/${MODULE_ID}/templates/card-viewer.html`,
                             popOut: false,
                             minimizable: true,
                             resizable: true,
@@ -44,7 +48,7 @@ class FancyDisplay {
                     }
 
                     activateListeners (html) {
-                        console.log("orcnog-card-viewer popout has rendered")
+                        LogUtility.debug("A popout was rendered.")
                         this.jsEvents(html[0]);
                     }
 
@@ -54,10 +58,10 @@ class FancyDisplay {
                         const dispGlint = html.querySelector('.decks-draw__disp-glint');
                         const wrpCard = html.querySelector('.decks-draw__wrp-card');
                         const wrpCardFlip = html.querySelector('.decks-draw__wrp-card-flip');
-                        const shareBtn = html.querySelector('.orcnog-card-viewer-share-btn');
+                        const shareBtn = html.querySelector(`.${MODULE_ID}-share-btn`);
 
                         if (imgBackPath) {
-                            const btnFlip = html.querySelector('.orcnog-card-viewer-flip-button');
+                            const btnFlip = html.querySelector(`.${MODULE_ID}-flip-button`);
                             btnFlip.addEventListener("click", (evt) => {
                                 evt.stopPropagation();
                                 wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
@@ -77,7 +81,7 @@ class FancyDisplay {
                         wrpDrawn.addEventListener("click", (evt) => {
                             evt.stopPropagation();
                             // html.remove(); // remove this
-                            $('.orcnog-card-viewer').remove(); // remove ALL
+                            $(`.${MODULE_ID}`).remove(); // remove ALL
                         });
 
                         wrpDrawn.addEventListener("mousemove", (evt) => {
@@ -175,6 +179,7 @@ class FancyDisplay {
 
                     getData() {
                         const data = super.getData();
+                        data.moduleId = MODULE_ID;
                         data.isGM = game.user.isGM;
                         data.showShareBtn = !share;
                         data.imgFront = this.imgFrontPath;
@@ -196,26 +201,25 @@ class FancyDisplay {
                 }
 
             } else {
-                ui.notifications.warn(game.i18n.localize("ORCNOG_CARD_VIEWER.notification.imagePathNotProvded")); // "Image URL or file path not provided.");
+                LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.imagePathNotProvded")); // "Image URL or file path not provided.");
             }
         } catch (error) {
-            console.error("Error rendering FancyPopout:", error);
+            LogUtility.error("Error rendering FancyPopout:", error);
         }
     }
 
     _shareToAll () {
         // Emit a socket message to all players
-        game.socket.emit('module.orcnog-card-viewer', {
-            type: 'VIEWCARD',
-            payload: {
-                imgFrontPath: this.imgFrontPath,
-                imgBackPath: this.imgBackPath,
-                borderColor: this.borderColor,
-                borderWidth: this.borderWidth,
-                faceDown: this.faceDown,
-                shareToAll: true
-            }
+        LogUtility.debug(`Firing 'ShareToAll' hook.`)
+        CardViewerSocket.executeForOthers('ShareToAll', {
+            imgFrontPath: this.imgFrontPath,
+            imgBackPath: this.imgBackPath,
+            borderColor: this.borderColor,
+            borderWidth: this.borderWidth,
+            faceDown: this.faceDown,
+            shareToAll: true
         });
+        LogUtility.log('You shared your card with everyone.')
     }
 
     _adjustToGlintColor (color) {
@@ -278,7 +282,7 @@ class FancyDisplay {
             bwidth = '0px';
         } else if (input == null) {
             // no value provided? get the default from game settings. fallback to 8px
-            bwidth = game.settings.get('orcnog-card-viewer', 'defaultCardBorderWidth') || '8px';
+            bwidth = game.settings.get(MODULE_ID, 'defaultCardBorderWidth') || '8px';
         } else if (!isNaN(Number(input))) {
             // assume unitless number is a pixel value
             bwidth = input + 'px';
@@ -298,7 +302,7 @@ class FancyDisplay {
             bcolor = '#fff296'; // #fff296 is the approx color of the sparkle floaties in the background.
         } else {
             // no value provided? get the default from game settings. fallback to #d29a38
-            bcolor = game.settings.get('orcnog-card-viewer', 'defaultCardBorderColor') || '#d29a38';
+            bcolor = game.settings.get(MODULE_ID, 'defaultCardBorderColor') || '#d29a38';
         }
         return bcolor;
     }
