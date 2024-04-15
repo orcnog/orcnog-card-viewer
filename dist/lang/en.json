@@ -5,6 +5,8 @@
   "ORCNOG_CARD_VIEWER.settings.enableDisplayOnDeal.hint": "Enable/disable displaying cards when they are dealt.",
   "ORCNOG_CARD_VIEWER.settings.enableDisplayOnPass.name": "Enable display on pass",
   "ORCNOG_CARD_VIEWER.settings.enableDisplayOnPass.hint": "Enable/disable displaying cards when they are passed.",
+  "ORCNOG_CARD_VIEWER.settings.enableDisplayOnDrawToHand.name": "Enable display on draw (to hand)",
+  "ORCNOG_CARD_VIEWER.settings.enableDisplayOnDrawToHand.hint": "Enable/disable displaying cards when they are drawn into a hand.",
   "ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.name": "Enable whisper card details to DM",
   "ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.hint": "Enable/disable whispering card details to the DM on view.",
   "ORCNOG_CARD_VIEWER.settings.defaultCardBorderWidth.name": "Default card border width",
