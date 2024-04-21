@@ -42,6 +42,7 @@ class CardDealer {
         this._initPromiseResolve();
     }
 
+    // draw one card and display it
     async draw(share) {
         try {
             await this.initPromise;
@@ -72,8 +73,7 @@ class CardDealer {
             if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) {
                 // Display with fancy card viewer module
                 new FancyDisplay({
-                    imgFrontPath: front,
-                    imgBackPath: back,
+                    imgArray: [{ front, back }],
                     faceDown: showFaceDown
                 }).render(shareToAll);
 
@@ -91,13 +91,13 @@ class CardDealer {
 
     /**
      * View a card (but do not draw it)
-     * @param {string} card This can be the card ID or the card's exact name.
+     * @param {Array|string} cards This can be an array of strings or a single string, which can be the card ID or the card's exact name.
      * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
      * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
      * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns 
      */
-    async view(card, faceDown, whisper, share) {
+    async view(cards, faceDown, whisper, share) {
         try {
             const deck = this.deck;
             const deckName = this.deckName;
@@ -105,32 +105,40 @@ class CardDealer {
             const doWhisper = whisper;
             const shareToAll = share;
 
-            if (!card) {
+            // Normalize cards input to always be an array
+            const cardsArray = Array.isArray(cards) ? cards : [cards];
+
+            if (!cardsArray || cardsArray.length === 0) {
                 LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardIdNotProvided")); // "Please provide a card name or ID."
                 return;
             }
 
-            // Get card by name
-            const cardToView = deck.cards.get(card) || deck.cards.getName(card);
-            if (!cardToView) {
-                LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
-                return;
-            }
+            const cardImgsArray = [];
 
-            // Extract card properties
-            const { id, name, front, back, desc } = this._extractCardProperties(cardToView);
+            cardsArray.forEach(card => {
+                // Get card by name
+                const cardToView = deck.cards.get(card) || deck.cards.getName(card);
+                if (!cardToView) {
+                    LogUtility.warn(card + ': ' + game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
+                    return;
+                }
+
+                // Extract card properties
+                const { id, name, front, back, desc } = this._extractCardProperties(cardToView);
+
+                cardImgsArray.push({ front, back });
+
+                if (doWhisper) {
+                    // Whisper the card instructions to the DM
+                    this._whisperCardInstructions(deckName, id, name, front, desc);
+                }
+            });
 
             // Display with fancy card viewer module
             new FancyDisplay({
-                imgFrontPath: front,
-                imgBackPath: back,
+                imgArray: cardImgsArray,
                 faceDown: showFaceDown
             }).render(shareToAll);
-
-            if (doWhisper) {
-                // Whisper the card instructions to the DM
-                this._whisperCardInstructions(deckName, id, name, front, desc);
-            }
 
         } catch (error) {
             LogUtility.error("Error rendering CardView.view():", error);

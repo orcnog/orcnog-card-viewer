@@ -30,7 +30,27 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-      
+
+.orcnog-card-viewer .orcnog-card-viewer-safe-viewing-area {
+    max-width: 85vw;
+    max-height: 85vh;
+    width: 100%;
+    height: 100%;
+}
+
+.orcnog-card-viewer .orcnog-card-viewer-card-animation-container {
+    display: flex;
+    column-gap: 3%;
+    animation-name: anim-sway;
+    animation-duration: 7s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.orcnog-card-viewer .orcnog-card-viewer-card-container {
+    display: flex;
+}
+
 .orcnog-card-viewer .orcnog-card-viewer-share-btn {
     position: fixed;
     top: 1.5rem;
@@ -98,8 +118,6 @@
 .orcnog-card-viewer .ve-flex-v-center {
     display: flex !important;
     align-items: center !important;
-    max-width: 32rem;
-    width: 62%;
 }
 
 .orcnog-card-viewer .ve-flex-vh-center {
@@ -132,12 +150,6 @@
 .orcnog-card-viewer .decks-draw__stg--visible {
     box-shadow: inset 0 0 100vh 100vh rgb(0 0 0 / 88%);
     transition: box-shadow 500ms;
-}
-
-.orcnog-card-viewer .decks-draw__wrp-sparkle-sway {
-    animation-name: anim-sway;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
 }
 
 .orcnog-card-viewer .decks-draw__img-sparkle {
@@ -183,12 +195,14 @@
 
 .orcnog-card-viewer .decks-draw__img-card {
     z-index: 0;
-    max-height: 100%;
-    max-width: 100%;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    max-height: calc(85vh - 2 * var(--px-card-border-width));
 }
 
 .orcnog-card-viewer .decks-draw__img-card-back {
-    z-index: -1;
+    z-index: 0;
     width: 100%;
     height: 100%;
     transform: rotateY(180deg);
@@ -203,13 +217,6 @@
 .orcnog-card-viewer.has-border .decks-draw__img-card-back {
     width: calc(100% - (var(--px-card-border-width) * 2));
     height: calc(100% - (var(--px-card-border-width) * 2));
-}
-
-.orcnog-card-viewer .decks-draw__wrp-card-sway {
-    animation-name: anim-sway;
-    animation-duration: 7s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-flip {
@@ -232,7 +239,7 @@
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__img-card-back {
-    z-index: 0;
+    z-index: 1;
 }
 
 .orcnog-card-viewer .decks-draw__wrp-card-flip--flipped .decks-draw__disp-glint {

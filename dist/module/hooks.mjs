@@ -82,7 +82,7 @@ export default function registerHooks() {
             view: function (deckName, card, faceDown, whisper, share) {
                 new CardDealer({
                     deckName: deckName
-                }).view(card, faceDown, whisper, share);
+                }).view([card], faceDown, whisper, share);
             },
             // View an image. (no border, can't flip)
             // WARNING: Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect
@@ -163,7 +163,7 @@ export default function registerHooks() {
             const shareToAll = false;
             if (id) new CardDealer({
                 deckName: deckCard.source.name
-            }).view(id, faceDown, whisper, shareToAll);
+            }).view([id], faceDown, whisper, shareToAll);
         });
         // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
@@ -185,7 +185,7 @@ export default function registerHooks() {
             const shareToAll = false;
             if (deckName && cardName) new CardDealer({
                 deckName: deckName
-            }).view(cardName, faceDown, whisper, shareToAll);
+            }).view([cardName], faceDown, whisper, shareToAll);
         });
 
         // TODO: Drag to canvas
@@ -208,13 +208,14 @@ export default function registerHooks() {
             discardPileName: destinations.length ? destinations[0].name : null
         });
         context.toCreate.forEach(dest => {
-            dest.forEach(card => {
-                const faceDown = true;
-                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
-            });
+            let drawnCards = dest;
+            if (dest instanceof Array === false) drawnCards = [dest];
+            const faceDown = true;
+            const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+            const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+            const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
+            const cards = drawnCards.map(item => item._id);
+            if (doView) viewer.view(cards, faceDown, whisper, shareToAll);
         });
     });
 
@@ -233,41 +234,51 @@ export default function registerHooks() {
             deckName: origin.name,
             discardPileName: destinations instanceof Cards ? destinations.name : destinations.length ? destinations[0].name : null
         });
+        const cards = [];
+        const faceDown = true;
+        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+        const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+        const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
         context.toCreate.forEach(dest => {
             let drawnCards = dest;
             if (dest instanceof Array === false) drawnCards = [dest];
-            drawnCards.forEach(card => {
-                const faceDown = true;
-                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
-            });
+            cards.push(...drawnCards.map(item => item._id));
         });
+        if (doView) viewer.view(cards, faceDown, whisper, shareToAll);
     });
 }
 
-//TODO: BUG FIX - when multiple cards are shared (e.g. multiple cards are DEALT and automatically shared simultaneouly), the Show to Players button is buggy
+// TOTEST: when multiple cards are shared (e.g. multiple cards are DEALT and automatically shared simultaneouly), the Show to Players button is buggy
 // Possible Solution: make the Show to Players button always share all currently-displayed cards / images simultaneouly?  Not sure.
 
-//TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
+// TOTEST: the presentation of multiple cards gets too small.  Need them to fill the space better.
 
-//TODO: Add more custom macro icons to /assets?
+// TOFIX: when flipped, the card perspective (expected to open face toward the cursor) is reversed.
 
-//TODO: Support non-card images...
-    //TODO: Support max-height sizing for images that aren't nec card-shaped.
-    //TODO: Support png / webp transparency (might be contingent on removing glint effects)
-    //TODO: Add options to remove glint affects (for non-card images)
-    //TODO: Add simple image macros back once support is satisfactory.
+// TOFIX: when executing a DRAW macro on a deck with no cards left, it throws a codey error.  Instead, front end should just show a friendly yellow warning to the user.
 
-//TODO: Stretch Goal - Dramatic reveal card flip.  Let the sharer control when the card is flipped for all other viewers.
+// TOFIX: it seems like clicking on a chat message card icon doesn't always work... maybe it's when a card was moved from stack to stack, the chat msg reference gets lost/confused?
 
-//TODO: Stretch goal - Anything that has a click-to-show, should also support drag-to-canvas.
+// TODO: Add a FLIP-ALL button... or a gesture, like click-dragging across all cards flips the whole group?
 
-//TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
+// TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
 
-//TODO: Stretch goal - add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares / sharing of an already dispalyed card/img.
+// TODO: Add more custom macro icons to /assets? For drawing multiple cards?
 
-//TODO: Stretch goal - add functionality to display image with frayed / torn / rough edges.
+// TODO: Support non-card images...
+    // TODO: Support max-height sizing for images that aren't nec card-shaped.
+    // TODO: Support png / webp transparency (might be contingent on removing glint effects)
+    // TODO: Add options to remove glint affects (for non-card images)
+    // TODO: Add simple image macros back once support is satisfactory.
 
-//TODO: Stretch goal - add ability to rotate the displayed image.
+// TODO: Stretch Goal - Dramatic reveal card flip.  Let the sharer control when the card is flipped for all other viewers (and suppress viewers' ability to flip).
+
+// TODO: Stretch Goal - Anything that has a click-to-show, should also support drag-to-canvas.
+
+// TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
+
+// TODO: Stretch Goal - add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares / sharing of an already dispalyed card/img.
+
+// TODO: Stretch Goal - add functionality to display image with frayed / torn / rough edges.
+
+// TODO: Stretch Goal - add ability to rotate the displayed image.
