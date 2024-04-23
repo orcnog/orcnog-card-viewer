@@ -12,7 +12,7 @@ export const registerSettings = function() {
     });
     // Enable/disable displaying cards when they are dealt.
     game.settings.register(MODULE_ID, 'enableDisplayOnDeal', {
-        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDeal.name"), // "Enable display on deal",
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDeal.name"), // "Display on deal",
         hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDeal.hint"), // "Enable/disable displaying cards when they are dealt.",
         scope: 'world',
         config: true,
@@ -21,7 +21,7 @@ export const registerSettings = function() {
     });
     // Enable/disable displaying cards when they are passed.
     game.settings.register(MODULE_ID, 'enableDisplayOnPass', {
-        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnPass.name"), // "Enable display on pass",
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnPass.name"), // "Display on pass",
         hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnPass.hint"), // "Enable/disable displaying cards when they are passed.",
         scope: 'world',
         config: true,
@@ -30,16 +30,65 @@ export const registerSettings = function() {
     });
     // Enable/disable displaying cards when they are drawn into a hand.
     game.settings.register(MODULE_ID, 'enableDisplayOnDrawToHand', {
-        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDrawToHand.name"), // "Enable display on draw (to hand)",
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDrawToHand.name"), // "Display on draw (to hand)",
         hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDisplayOnDrawToHand.hint"), // "Enable/disable displaying cards when they are drawn into a hand.",
         scope: 'world',
         config: true,
         default: true,
         type: Boolean
     });
+    game.settings.register(MODULE_ID, 'whatDeterminesCardFace', {
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.whatDeterminesCardFace.name"), // "Select what determins initial card face",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.whatDeterminesCardFace.hint"), // "Logic that determines which card face is initially shown on display. "Source stack determines face" means a card may display initially face-up or face-down based on how it is facing in its source stack. "Always face-up" makes all cards always render face-up regardless of any other settings you've selected. "Always face-down" likewise means cards will never render face-up or do a dramatic flip reveal, no matter what other settings you've configured.",
+        scope: 'world',
+        config: true,
+        default: "source",
+        type: String,
+        choices: {
+            "alwaysdown": "Always face-down",
+            "alwaysup": "Always face-up",
+            "source": "Source stack determines face",
+        },
+      });
+    // Enable/disable dramatic flip reveal when cards are dealt.
+    game.settings.register(MODULE_ID, 'enableDramaticRevealOnDeal', {
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnDeal.name"), // "Dramatic reveal on Deal",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnDeal.hint"), // "When a Deal action is performed, enable/disable showing the card(s) facedown at first, then dramatically flipping them over automatically after a brief pause.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable dramatic flip reveal on when cards are passed.
+    game.settings.register(MODULE_ID, 'enableDramaticRevealOnPass', {
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnPass.name"), // "Dramatic reveal reveal on Pass",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnPass.hint"), // "When a Pass action is performed, enable/disable showing the card(s) facedown at first, then dramatically flipping them over automatically after a brief pause.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable dramatic flip reveal on when cards are drawn into a hand.
+    game.settings.register(MODULE_ID, 'enableDramaticRevealOnDrawToHand', {
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnDrawToHand.name"), // "Dramatic reveal on Draw (to hand)",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnDrawToHand.hint"), // "When a Draw action is performed, enable/disable showing the card(s) facedown at first, then dramatically flipping them over automatically after a brief pause.",
+        scope: 'world',
+        config: true,
+        default: true,
+        type: Boolean
+    });
+    // Enable/disable clickable card icons in Sidebar Card Stacks.
+    game.settings.register(MODULE_ID, 'enableDramaticRevealOnCardIconClick', {
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnCardIconClick.name"), // "Dramatic reveal on card icon click",
+        hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableDramaticRevealOnCardIconClick.hint"), // "On card icon clicks, enable/disable showing the card(s) facedown at first, then dramatically flipping them over automatically after a brief pause.",
+        scope: 'world',
+        config: true,
+        default: false,
+        type: Boolean
+    });
     // Enable/disable whispering card details to the DM on view.
     game.settings.register(MODULE_ID, 'enableWhisperCardTextToDM', {
-        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.name"), // "Enable whisper card details to DM",
+        name: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.name"), // "Whisper card details to DM",
         hint: game.i18n.localize("ORCNOG_CARD_VIEWER.settings.enableWhisperCardTextToDM.hint"), // "Enable/disable whispering card details to the DM on view.",
         scope: 'world',
         config: true,

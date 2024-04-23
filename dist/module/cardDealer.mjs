@@ -42,7 +42,7 @@ class CardDealer {
         this._initPromiseResolve();
     }
 
-    // draw one card and display it
+    // Draw one random card and display it
     async draw(share) {
         try {
             await this.initPromise;
@@ -91,13 +91,14 @@ class CardDealer {
 
     /**
      * View a card (but do not draw it)
-     * @param {Array|string} cards This can be an array of strings or a single string, which can be the card ID or the card's exact name.
+     * @param {Array|string} cards This can be an array of strings or a single string, which can be the card ID or exact name.
      * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
      * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
+     * @param {boolean} dramaticReveal Optional, tells the viewer whether to show the card facedown at first, then automatically flip it over after a 1/2 sec (default is no)
      * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns 
      */
-    async view(cards, faceDown, whisper, share) {
+    async view(cards, faceDown, whisper, dramaticReveal, share) {
         try {
             const deck = this.deck;
             const deckName = this.deckName;
@@ -115,9 +116,9 @@ class CardDealer {
 
             const cardImgsArray = [];
 
-            cardsArray.forEach(card => {
-                // Get card by name
-                const cardToView = deck.cards.get(card) || deck.cards.getName(card);
+            cardsArray.forEach(async (card) => {
+                let cardToView = this._findCardAnywhere(card);
+
                 if (!cardToView) {
                     LogUtility.warn(card + ': ' + game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
                     return;
@@ -137,12 +138,19 @@ class CardDealer {
             // Display with fancy card viewer module
             new FancyDisplay({
                 imgArray: cardImgsArray,
-                faceDown: showFaceDown
-            }).render(shareToAll);
+                faceDown: showFaceDown,
+            }).render(shareToAll, dramaticReveal);
 
         } catch (error) {
             LogUtility.error("Error rendering CardView.view():", error);
         }
+    }
+
+    // Given a card ID string, find and return the card no matter what stack it currently lives in (because it can move around)
+    _findCardAnywhere(cardStr) {
+        let card = game.cards.find(stack => stack.cards.get(cardStr))?.cards.get(cardStr);
+        card = card || game.cards.find(stack => stack.cards.getName(cardStr))?.cards.getName(cardStr);
+        return card;
     }
 
     // Get the discard pile by name, or smart detect a discard pile's existence and get that, or create a new one.

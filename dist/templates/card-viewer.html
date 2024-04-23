@@ -54,7 +54,7 @@
             </div>
             <div class="{{moduleId}}-card-animation-container decks-draw__wrp-card-sway no-select relative">
                 {{#each images as |image index|}}
-                <div class="{{../moduleId}}-flip-container ve-flex-vh-center decks-draw__wrp-card-flip">
+                <div class="{{../moduleId}}-flip-container ve-flex-vh-center decks-draw__wrp-card-flip {{#if (or ../faceDown ../dramaticReveal)}}decks-draw__wrp-card-flip--flipped{{/if}}">
                     <div class="{{../moduleId}}-card-container decks-draw__wrp-card relative decks-draw__wrp-card--visible {{#if image.back}}{{../moduleId}}-flip-button{{/if}}">
                         {{#if image.back}}
                         <img src="{{image.back}}" class="decks-draw__img-card-back absolute">

@@ -10,7 +10,7 @@ class FancyDisplay {
         this.faceDown = faceDown;
     }
 
-    async render(shareToAll) {
+    async render(shareToAll, dramaticReveal) {
         try {
             // Specify the image URL or file path
             const FancyDisplay = this;
@@ -19,14 +19,9 @@ class FancyDisplay {
                 if (!image.back) {
                     image.back = game.settings.get(MODULE_ID, 'defaultCardBackImage');
                 }
-
-                // Swap the front and back paths if the faceDown condition is true
-                if (this.faceDown) {
-                    let temp = image.front;
-                    image.front = image.back;
-                    image.back = temp;
-                }
             });
+            const renderFaceDown = this.faceDown;
+            const renderDramaticReveal = dramaticReveal;
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
             const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
             const share = shareToAll;
@@ -58,15 +53,9 @@ class FancyDisplay {
                     activateListeners(html) {
                         LogUtility.debug("A popout was rendered.");
                         this.jsEvents(html[0]);
-                        // this.images.forEach((image, index) => {
-                        //     let cardElement = html.find(`.card-image-${index}`);
-                        //     cardElement.on('click', () => {
-                        //         cardElement.toggleClass("flipped");
-                        //     });
-                        // });
                     }
 
-                    async jsEvents (html, images) {
+                    async jsEvents (html) {
                         // JS manipulation - 85 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
                         const wrpDrawn = html.querySelector('.decks-draw__stg');
                         const wrpCards = html.querySelectorAll('.decks-draw__wrp-card');
@@ -114,6 +103,19 @@ class FancyDisplay {
                                 });
                             });
                         });
+
+                        // Automatically flip all cards over (animated), if they are supposed to be face up.
+                        if (dramaticReveal && !renderFaceDown) {
+                            setTimeout(() => {
+                                // After 1/2 a second, start the interval
+                                let flipAllIndex = 0;
+                                let flipAll = setInterval(() => {
+                                    wrpCardFlips[flipAllIndex]?.classList.remove('decks-draw__wrp-card-flip--flipped');
+                                    flipAllIndex++;
+                                    if (flipAllIndex === wrpCardFlips.length) clearInterval(flipAll);
+                                }, 80);
+                            }, 500);
+                        }
 
                         function _pRenderStgCard_onMouseMove_mutElements ({mouseX, mouseY, wrpCard, dispGlint}) {
                             const perStyles = _pRenderStgCard_getPerspectiveStyles({mouseX, mouseY, ele: wrpCard});
@@ -205,6 +207,8 @@ class FancyDisplay {
                         data.isGM = game.user.isGM;
                         data.showShareBtn = !share;
                         data.images = this.images;
+                        data.dramaticReveal = renderDramaticReveal;
+                        data.faceDown = FancyDisplay.faceDown;
                         data.hasBorder = parseInt(this.borderWidth) !== 0;
                         data.borderColor = this.borderColor;
                         data.borderWidth = this.borderWidth;
