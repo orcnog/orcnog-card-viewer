@@ -1,3 +1,40 @@
+/* Game Settings menu styles */
+
+/* facelogicgroup controls visibility of the next field */
+#client-settings form div.form-group.ocv-facelogicgroup.ocv-facelogicgroup + div.form-group {
+    max-height: 15em;
+    transition: padding 100ms, border-width 100ms, max-height 100ms;
+    overflow: hidden;
+}
+
+#client-settings form div.form-group.ocv-facelogicgroup.ocv-facelogicgroup:not(.active) + div.form-group {
+    border-width: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+/* displaygroup controls visibility of the next 2 fields */
+#client-settings form div.form-group.ocv-displaygroup + div.form-group,
+#client-settings form div.form-group.ocv-displaygroup + div.form-group + div.form-group {
+    margin: -1rem -0.5rem 1rem 0;
+    padding: 1rem 0.5rem 1rem 2rem;
+    max-height: 15em;
+    background: rgba(0 0 0 / 6%);
+    transition: padding 100ms, border-width 100ms, max-height 100ms;
+    overflow: hidden;
+}
+#client-settings form div.form-group.ocv-displaygroup:not(.active) + div.form-group,
+#client-settings form div.form-group.ocv-displaygroup:not(.active) + div.form-group + div.form-group {
+    border-width: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+/*Card Viewer styles */
+
 .orcnog-card-viewer {
     height: 100%;
     width: 100%;

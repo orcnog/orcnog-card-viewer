@@ -34,9 +34,10 @@ A quick demo showcasing 2 macros that will draw a random card from a given deck 
 You'll need to import all the macros from the compendium in this module and customize them.
 
 ## Draw a Card
-1. Replace 'Deck of Many Things' with name of a deck in your world.
-2. Replace 'My Discard Pile' with the name of a pile in your world.
-3. If you set share to true, everyone logged in FVTT will see the card.
+1. Replace `'Deck of Many Things'` with name of a deck in your world.
+2. Replace `'My Discard Pile'` with the name of a pile in your world.
+3. If you set `share` to true, everyone logged in FVTT will see the card immediately when drawn.
+4. `face` determines how the card is initially displayed. This var can be ommitted, or set to "UP", "DOWN", or "REVEAL" to flip the card face-up with animation.
 
 ```
 // Draws, views, and discards a card from a given deck name. Leave discardPile null to smart-match an existing discard pile name or auto-create a new one named "[your deck name] - Discard Pile".
@@ -44,16 +45,17 @@ You'll need to import all the macros from the compendium in this module and cust
 let deckName = 'Deck of Many Things';
 let discardPile = 'My Discard Pile';
 let share = true;
+let face = "REVEAL"; //either "UP", "DOWN", or "REVEAL" to flip up
 
 OrcnogFancyCardDealer({
    deckName: deckName ,
    discardPileName: discardPile
-}).draw(share);
+}).draw(share, face);
 ```
 
 ## View a Card
-1. Replace 'Deck of Many Things' with name of a deck in your world.
-2. Replace 'Gem' with the name of a card in the deck or the UID.
+1. Replace `'Deck of Many Things'` with name of a deck in your world.
+2. Replace `'Gem'` with the name of a card in the deck or the UID.
 3. set faceDown to true and the card will shown flipped.
 4. If you set share to true, everyone logged in FVTT will see the card.
 
@@ -73,11 +75,11 @@ OrcnogFancyCardDealer({
 
 ## View Any Image as a Card
 
-1. Replace 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp' with a path or URL to any image you want.
-2. You can replace 'modules/orcnog-card-viewer/assets/orcnogback.webp' with a path or URL to any card back image.
-3. borderColor can change the border color.
-4. borderWidth can change the colored border thickness.
-5. shareToAll will show to everyone.
+1. Replace `'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp'` with a path or URL to any image you want.
+2. You can replace `'modules/orcnog-card-viewer/assets/orcnogback.webp'` with a path or URL to any card back image.
+3. `borderColor` can change the border color.
+4. `borderWidth` can change the colored border thickness.
+5. `shareToAll` will show to everyone.
 
 ```
 // Requires Orcnog's Card Viewer

@@ -208,7 +208,7 @@ class FancyDisplay {
                         data.showShareBtn = !share;
                         data.images = this.images;
                         data.dramaticReveal = renderDramaticReveal;
-                        data.faceDown = FancyDisplay.faceDown;
+                        data.faceDown = renderFaceDown;
                         data.hasBorder = parseInt(this.borderWidth) !== 0;
                         data.borderColor = this.borderColor;
                         data.borderWidth = this.borderWidth;

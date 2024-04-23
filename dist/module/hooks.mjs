@@ -5,7 +5,7 @@
 
 // Import JavaScript modules
 import { MODULE_ID, MODULE_SHORT, MODULE_TITLE } from "./consts.mjs";
-import { registerSettings } from './settings.mjs';
+import { registerSettings, onRenderSettingsConfig } from './settings.mjs';
 import { preloadTemplates } from './preloadTemplates.mjs';
 import { LogUtility } from "./log.mjs";
 import FancyDisplay from './fancyDisplay.mjs';
@@ -61,6 +61,13 @@ export default function registerHooks() {
     });
 
     /* ------------------------------------ */
+    /* Initialize Settings                  */
+    /* ------------------------------------ */
+    Hooks.on('renderSettingsConfig', (app, html, data) => {
+        onRenderSettingsConfig(app, html, data);
+    });
+
+    /* ------------------------------------ */
     /* Setup module                         */
     /* ------------------------------------ */
     Hooks.once('setup', function () {
@@ -70,12 +77,13 @@ export default function registerHooks() {
         };
         game.modules.get(MODULE_ID).api = {
             // Draw a card
-            // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true);`
-            draw: function (deckName, discardPileName, share) {
+            // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true, false, true);`
+            draw: function (deckName, discardPileName, share = true, faceDown = true, dramaticReveal) {
                 new CardDealer({
                     deckName: deckName,
-                    discardPileName: discardPileName
-                }).draw(share);
+                    discardPileName: discardPileName,
+                    faceDown: faceDown,
+                }).draw(share, dramaticReveal);
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardNameOrID, true, true, true);`
@@ -150,19 +158,20 @@ export default function registerHooks() {
 
     Hooks.on('renderApplication', (app, $html, data) => {
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
         if (app instanceof CardsConfig !== true) return;
+        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
 
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
         $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
-            const cardFaceLogic = game.settings.get(MODULE_ID, 'whatDeterminesCardFace');
-            const faceDown = cardFaceLogic === 'source' ? deckCard.face === null : cardFaceLogic === 'alwaysdown' ? true : false;
             const id = $(event.target).closest('.card').data('card-id');
             const deckCard = data.cards.find(c => c._id === id);
+            // Configs
+            const faceDown = deckCard.face === null;
             const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-            const dramaticReveal = game.settings.get(MODULE_ID, 'enableDramaticRevealOnCardIconClick');
+            const dramaticReveal = false;
             const shareToAll = false;
+            // Set up viewer
             if (id) new CardDealer({
                 deckName: deckCard.source.name
             }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
@@ -180,12 +189,14 @@ export default function registerHooks() {
         // Register card icon click handler
         const $message = $html.find(`.${MODULE_ID}-msg`);
         $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
+            // Configs
             const faceDown = false;
+            const whisper = false;
+            const dramaticReveal = false;
+            const shareToAll = false;
+            // Set up viewer
             const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
             const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
-            const whisper = false;
-            const dramaticReveal = game.settings.get(MODULE_ID, 'enableDramaticRevealOnCardIconClick');
-            const shareToAll = false;
             if (deckName && cardId) new CardDealer({
                 deckName: deckName
             }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
@@ -198,23 +209,25 @@ export default function registerHooks() {
     // View on card "Deal" action
 
     Hooks.on('dealCards', (origin, destinations, context) => {
+        const isDeal = context.action.startsWith('deal');
+        const isPass = context.action.startsWith('pass');
+
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && context.action.startsWith('deal')) return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action.startsWith('pass')) return;
+        if (context.action.includes(`${MODULE_SHORT}_nohook`)) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && isDeal) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
         if (context.toCreate.length === 0) return;
       
-        // Show any and all cards that were dealt
+        // Show all cards that were dealt
         const viewer = new CardDealer({
             deckName: origin.name,
             discardPileName: destinations.length ? destinations[0].name : null
         });
         const cards = [];
         let drawnCards;
-        const cardFaceLogic = game.settings.get(MODULE_ID, 'whatDeterminesCardFace');
         const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-        const dramaticRevealOnDeal = game.settings.get(MODULE_ID, 'enableDramaticRevealOnDeal');
-        const dramaticRevealOnPass = game.settings.get(MODULE_ID, 'enableDramaticRevealOnPass');
-        const dramaticReveal = context.action === 'deal' ? dramaticRevealOnDeal : context.action === 'pass' ? dramaticRevealOnPass : false;
+        const cardFaceLogic = game.settings.get(MODULE_ID, isDeal ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
+        const dramaticReveal = game.settings.get(MODULE_ID, isDeal ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
         const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
         const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
         context.toCreate.forEach(dest => {
@@ -229,9 +242,12 @@ export default function registerHooks() {
     // View on card "Draw" action performed within a "Hand" stack
 
     Hooks.on('passCards', (origin, destinations, context) => {
+        const isDraw = context.action.startsWith('draw');
+        const isPass = context.action.startsWith('pass');
+
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDrawToHand') && context.action === 'draw') return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDraw') && isDraw) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
         if (context.toCreate.length === 0) return;
       
         // Show any and all cards that were dealt
@@ -241,11 +257,9 @@ export default function registerHooks() {
         });
         const cards = [];
         let drawnCards;
-        const cardFaceLogic = game.settings.get(MODULE_ID, 'whatDeterminesCardFace');
         const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-        const dramaticRevealOnDraw = game.settings.get(MODULE_ID, 'enableDramaticRevealOnDrawToHand');
-        const dramaticRevealOnPass = game.settings.get(MODULE_ID, 'enableDramaticRevealOnPass');
-        const dramaticReveal = context.action === 'draw' ? dramaticRevealOnDraw : context.action === 'pass' ? dramaticRevealOnPass : false;
+        const cardFaceLogic = game.settings.get(MODULE_ID, isDraw ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
+        const dramaticReveal = game.settings.get(MODULE_ID, isDraw ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
         const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
         const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
         context.toCreate.forEach(dest => {
@@ -259,18 +273,20 @@ export default function registerHooks() {
 }
 
 
-// TOFIX: when executing a DRAW macro on a deck with no cards left, it throws a codey error.  Instead, front end should just show a friendly yellow warning to the user.
+// TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
 
+// TOFIX: after a card is flipped, its perspective (expected to open face toward the cursor) is reversed.
 
-// TODO: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
+// TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
-// TODO: after a card is flipped, its perspective (expected to open face toward the cursor) is reversed.
-
-// TODO: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
 // TODO: Now that multiple card displays work, add a FLIP-ALL button... or a GESTURE? like click-dragging across all cards flips the whole group?
 
+// TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
+
 // TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
+
+// TODO: Convert all jQuery to raw JS.
 
 // TODO: Add more custom macro icons to /assets? For drawing multiple cards?
 
