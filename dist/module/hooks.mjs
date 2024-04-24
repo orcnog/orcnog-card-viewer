@@ -97,14 +97,14 @@ export default function registerHooks() {
             // Example: `game.modules.get('orcnog-card-viewer').api.viewImage(imgPath, true);`
             viewImage: function (image, share) {
                 new FancyDisplay({
-                    imgFrontPath: image
+                    imgArray: [{ front: image, back: null }],
                 }).render(share);
             },
             // View any image like a card
             // Example: `game.modules.get('orcnog-card-viewer').api.viewImageAsCard(imgPath, true);`
             viewImageAsCard: function (image, share) {
                 new FancyDisplay({
-                    imgFrontPath: image,
+                    imgArray: [{ front: image, back: null }],
                     faceDown: true
                 }).render(share);
             },
@@ -112,11 +112,10 @@ export default function registerHooks() {
             // Example: `const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({ front: imgPath });`
             FancyDisplay: function ({ front, back = null, border = null, borderWidth = null, faceDown = true }) { // #d29a38
                 return new FancyDisplay({
-                    imgFrontPath: front,
-                    imgBackPath: back,
+                    imgArray: [{ front, back }],
                     borderColor: border,
                     borderWidth: borderWidth,
-                    faceDown: faceDown
+                    faceDown: faceDown 
                 });
             },
             // Create a CardDealer instance and expose the whole thing
@@ -145,7 +144,7 @@ export default function registerHooks() {
         // Construct a FancyDisplay for just a simple image
         // WARNING! Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect.
         globalThis.OrcnogFancyImage = function (image) {
-            return new FancyDisplay({ imgFrontPath: image });
+            return new FancyDisplay({ imgArray: [{ front:image, back:null }] });
         };
 
         // Emit hook on init complete
@@ -280,9 +279,18 @@ export default function registerHooks() {
 // TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
 
+
+// TODO: "Watch me flip".  Let the sharer control when the card is flipped for all other viewers (and suppress viewers' ability to flip or exit view).
+
+// TODO: Add option to no-flip.  Suppress a viewer's (GM's or players') ability to flip the image at all.
+
+// TODO: Add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares, label the view per sharer (in case multiple start to fill the screen).
+
 // TODO: Now that multiple card displays work, add a FLIP-ALL button... or a GESTURE? like click-dragging across all cards flips the whole group?
 
 // TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
+
+// TODO: Write a "Draw Cards" macro that can draw from a deck into a hand.
 
 // TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
 
@@ -297,17 +305,16 @@ export default function registerHooks() {
     // TODO: Add simple image macros back once support is satisfactory.
 
 
-// TODO: Stretch Goal - "Watch me flip".  Let the sharer control when the card is flipped for all other viewers (and suppress viewers' ability to flip).
 
 // TODO: Stretch Goal - Display multiple cards more like hand-held - in a slight arc, maybe even overlapping.
 
 // TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 
 
+// TODO: MAYBE Stretch Goal - Add sound FX for flip, draw, deal, pass, and maybe shuffle.
+
 // TODO: MAYBE Stretch Goal - add functionality to display image with frayed / torn / rough edges (for non-card images).
 
 // TODO: MAYBE Stretch Goal - add ability to rotate or zoom in on the displayed image.
 
 // TODO: MAYBE Stretch Goal - Anything that has a click-to-show, should also support drag-to-canvas.
-
-// TODO: MAYBE Stretch Goal - add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares / sharing of an already dispalyed card/img.

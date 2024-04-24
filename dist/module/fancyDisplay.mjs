@@ -4,7 +4,7 @@ import { CardViewerSocket } from './hooks.mjs';
 
 class FancyDisplay {
     constructor({imgArray, borderColor, borderWidth, faceDown}) {
-        this.imgArray = imgArray;  // This now holds an array of objects with imgFrontPath and imgBackPath
+        this.imgArray = imgArray;
         this.borderColor = borderColor;
         this.borderWidth = borderWidth;
         this.faceDown = faceDown;
