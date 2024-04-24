@@ -5,7 +5,7 @@
 
 // Import JavaScript modules
 import { MODULE_ID, MODULE_SHORT, MODULE_TITLE } from "./consts.mjs";
-import { registerSettings } from './settings.mjs';
+import { registerSettings, onRenderSettingsConfig } from './settings.mjs';
 import { preloadTemplates } from './preloadTemplates.mjs';
 import { LogUtility } from "./log.mjs";
 import FancyDisplay from './fancyDisplay.mjs';
@@ -61,6 +61,13 @@ export default function registerHooks() {
     });
 
     /* ------------------------------------ */
+    /* Initialize Settings                  */
+    /* ------------------------------------ */
+    Hooks.on('renderSettingsConfig', (app, html, data) => {
+        onRenderSettingsConfig(app, html, data);
+    });
+
+    /* ------------------------------------ */
     /* Setup module                         */
     /* ------------------------------------ */
     Hooks.once('setup', function () {
@@ -70,19 +77,20 @@ export default function registerHooks() {
         };
         game.modules.get(MODULE_ID).api = {
             // Draw a card
-            // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true);`
-            draw: function (deckName, discardPileName, share) {
+            // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true, false, true);`
+            draw: function (deckName, discardPileName, share = true, faceDown = true, dramaticReveal) {
                 new CardDealer({
                     deckName: deckName,
-                    discardPileName: discardPileName
-                }).draw(share);
+                    discardPileName: discardPileName,
+                    faceDown: faceDown,
+                }).draw(share, dramaticReveal);
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardNameOrID, true, true, true);`
             view: function (deckName, card, faceDown, whisper, share) {
                 new CardDealer({
                     deckName: deckName
-                }).view(card, faceDown, whisper, share);
+                }).view([card], faceDown, whisper, share);
             },
             // View an image. (no border, can't flip)
             // WARNING: Experimental! Having trouble with iamge sizing, webp/png transparency, and most non-card images look bad with the glint effect
@@ -150,20 +158,23 @@ export default function registerHooks() {
 
     Hooks.on('renderApplication', (app, $html, data) => {
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
         if (app instanceof CardsConfig !== true) return;
-      
+        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
+
         // Register card icon click handler
         const $card_icon = $html.find('img.card-face');
         $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
             const id = $(event.target).closest('.card').data('card-id');
             const deckCard = data.cards.find(c => c._id === id);
+            // Configs
             const faceDown = deckCard.face === null;
             const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+            const dramaticReveal = false;
             const shareToAll = false;
+            // Set up viewer
             if (id) new CardDealer({
                 deckName: deckCard.source.name
-            }).view(id, faceDown, whisper, shareToAll);
+            }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
         });
         // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
@@ -178,14 +189,17 @@ export default function registerHooks() {
         // Register card icon click handler
         const $message = $html.find(`.${MODULE_ID}-msg`);
         $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
-            const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
-            const cardName = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
+            // Configs
             const faceDown = false;
             const whisper = false;
+            const dramaticReveal = false;
             const shareToAll = false;
-            if (deckName && cardName) new CardDealer({
+            // Set up viewer
+            const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
+            const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
+            if (deckName && cardId) new CardDealer({
                 deckName: deckName
-            }).view(cardName, faceDown, whisper, shareToAll);
+            }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
         });
 
         // TODO: Drag to canvas
@@ -195,79 +209,105 @@ export default function registerHooks() {
     // View on card "Deal" action
 
     Hooks.on('dealCards', (origin, destinations, context) => {
+        const isDeal = context.action.startsWith('deal');
+        const isPass = context.action.startsWith('pass');
+
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && context.action === 'deal') return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
+        if (context.action.includes(`${MODULE_SHORT}_nohook`)) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && isDeal) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
         if (context.toCreate.length === 0) return;
       
-        // Show any and all cards that were dealt
-        // TODO: show multiple cards in one render (instead of multiple renders)
-        // Temporary TODO^ fix: on click of background, close all popped up cards.
+        // Show all cards that were dealt
         const viewer = new CardDealer({
             deckName: origin.name,
             discardPileName: destinations.length ? destinations[0].name : null
         });
+        const cards = [];
+        let drawnCards;
+        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+        const cardFaceLogic = game.settings.get(MODULE_ID, isDeal ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
+        const dramaticReveal = game.settings.get(MODULE_ID, isDeal ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
+        const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+        const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
         context.toCreate.forEach(dest => {
-            dest.forEach(card => {
-                const faceDown = true;
-                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
-            });
+            drawnCards = dest;
+            if (dest instanceof Array === false) drawnCards = [dest];
+            cards.push(...drawnCards.map(item => item._id));
         });
+        const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
+        if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
     });
 
     // View on card "Draw" action performed within a "Hand" stack
 
     Hooks.on('passCards', (origin, destinations, context) => {
+        const isDraw = context.action.startsWith('draw');
+        const isPass = context.action.startsWith('pass');
+
         // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDrawToHand') && context.action === 'draw') return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && context.action === 'pass') return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDraw') && isDraw) return;
+        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
         if (context.toCreate.length === 0) return;
       
         // Show any and all cards that were dealt
-        // TODO: show multiple cards in one render (instead of multiple renders)
-        // Temporary TODO^ fix: on click of background, close all popped up cards.
         const viewer = new CardDealer({
             deckName: origin.name,
             discardPileName: destinations instanceof Cards ? destinations.name : destinations.length ? destinations[0].name : null
         });
+        const cards = [];
+        let drawnCards;
+        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+        const cardFaceLogic = game.settings.get(MODULE_ID, isDraw ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
+        const dramaticReveal = game.settings.get(MODULE_ID, isDraw ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
+        const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+        const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
         context.toCreate.forEach(dest => {
-            let drawnCards = dest;
+            drawnCards = dest;
             if (dest instanceof Array === false) drawnCards = [dest];
-            drawnCards.forEach(card => {
-                const faceDown = true;
-                const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-                const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-                const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-                if (doView) viewer.view(card._id, faceDown, whisper, shareToAll);
-            });
+            cards.push(...drawnCards.map(item => item._id));
         });
+        const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
+        if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
     });
 }
 
-//TODO: BUG FIX - when multiple cards are shared (e.g. multiple cards are DEALT and automatically shared simultaneouly), the Show to Players button is buggy
-// Possible Solution: make the Show to Players button always share all currently-displayed cards / images simultaneouly?  Not sure.
 
-//TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
+// TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
 
-//TODO: Add more custom macro icons to /assets?
+// TOFIX: after a card is flipped, its perspective (expected to open face toward the cursor) is reversed.
 
-//TODO: Support non-card images...
-    //TODO: Support max-height sizing for images that aren't nec card-shaped.
-    //TODO: Support png / webp transparency (might be contingent on removing glint effects)
-    //TODO: Add options to remove glint affects (for non-card images)
-    //TODO: Add simple image macros back once support is satisfactory.
+// TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
-//TODO: Stretch Goal - Dramatic reveal card flip.  Let the sharer control when the card is flipped for all other viewers.
 
-//TODO: Stretch goal - Anything that has a click-to-show, should also support drag-to-canvas.
+// TODO: Now that multiple card displays work, add a FLIP-ALL button... or a GESTURE? like click-dragging across all cards flips the whole group?
 
-//TODO: Stretch goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
+// TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
 
-//TODO: Stretch goal - add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares / sharing of an already dispalyed card/img.
+// TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
 
-//TODO: Stretch goal - add functionality to display image with frayed / torn / rough edges.
+// TODO: Convert all jQuery to raw JS.
 
-//TODO: Stretch goal - add ability to rotate the displayed image.
+// TODO: Add more custom macro icons to /assets? For drawing multiple cards?
+
+// TODO: Support non-card images...
+    // TODO: Support max-height sizing for images that aren't nec card-shaped.
+    // TODO: Support png / webp transparency (might be contingent on removing glint effects)
+    // TODO: Add options to remove glint affects (for non-card images)
+    // TODO: Add simple image macros back once support is satisfactory.
+
+
+// TODO: Stretch Goal - "Watch me flip".  Let the sharer control when the card is flipped for all other viewers (and suppress viewers' ability to flip).
+
+// TODO: Stretch Goal - Display multiple cards more like hand-held - in a slight arc, maybe even overlapping.
+
+// TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
+
+
+// TODO: MAYBE Stretch Goal - add functionality to display image with frayed / torn / rough edges (for non-card images).
+
+// TODO: MAYBE Stretch Goal - add ability to rotate or zoom in on the displayed image.
+
+// TODO: MAYBE Stretch Goal - Anything that has a click-to-show, should also support drag-to-canvas.
+
+// TODO: MAYBE Stretch Goal - add Show to Players button to non-DMs... but this will get hairy... Need to somehow block immediate re-shares / sharing of an already dispalyed card/img.

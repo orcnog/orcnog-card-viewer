@@ -42,48 +42,67 @@ class CardDealer {
         this._initPromiseResolve();
     }
 
-    async draw(share) {
+    // Draw one random card and display it
+    /**
+     * draw function
+     * @param {boolean} share whether to automatically share the card to all other players on display
+     * @param {string} forcedFace force the card to display as "UP", "DOWN", or "REVEAL" (for a dramatic reveal)
+     */
+    async draw(share = true, forcedFace) {
+        let deckName, deck, pile;
         try {
             await this.initPromise;
 
-            const deckName = this.deckName;
-            const deck = this.deck;
-            const shareToAll = share;
+            deckName = this.deckName;
+            deck = this.deck;
 
             // At this point, it is mandatory that we have a discard pile.
             // If there's not already a discard pile assigned to THIS, try to match an existing discard pile by name, or just create a new one.
             if (!this.pile) this.pile = await this._createNewDiscardPile();
 
-            const pile = this.pile;
+            pile = this.pile;
+        } catch (error) {
+            LogUtility.error("Error rendering CardDraw.draw():", error);
+        }
 
+        try {
             // Deal 1 random card and grab reference to the dealt card
             await deck.deal([pile], 1, {
                 how: CONST.CARD_DRAW_MODES.RANDOM,
-                action: shareToAll ? `deal ${MODULE_SHORT}_doshare` : 'deal',
+                action: `deal ${MODULE_SHORT}_nohook`,
                 chatNotification: false
             });
+        } catch(error) {
+            LogUtility.error(error, {ui: true});
+            return null;
+        }
 
+        try {
             const drawnCard = pile.cards.contents[pile.cards.size - 1];
+            const cardFaceLogic = game.settings.get(MODULE_ID, 'whatDeterminesCardFaceOnDraw');
+            const faceDown = (forcedFace == null) ? 
+                 (cardFaceLogic === "alwaysdown" ? true :
+                  cardFaceLogic === "alwaysup" ? false :
+                  drawnCard.face === null) :
+                 (forcedFace === "DOWN" ? true :
+                  (forcedFace === "UP" || forcedFace === "REVEAL") ? false : false);
+            const dramaticReveal = forcedFace === 'REVEAL' || (!forcedFace && game.settings.get(MODULE_ID, 'enableDramaticRevealOnDraw') === true);
 
             // Extract card properties
             const { id, name, front, back, desc } = this._extractCardProperties(drawnCard);
-            const showFaceDown = true;
 
-            if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal')) {
+            if (game.settings.get(MODULE_ID, 'enableDisplayOnDraw')) {
                 // Display with fancy card viewer module
                 new FancyDisplay({
-                    imgFrontPath: front,
-                    imgBackPath: back,
-                    faceDown: showFaceDown
-                }).render(shareToAll);
-
-                if (game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM')) {
-                    // Whisper the card instructions to the DM
-                    this._whisperCardInstructions(deckName, id, name, front, desc);
-                }
+                    imgArray: [{ front, back }],
+                    faceDown: faceDown,
+                }).render(share, dramaticReveal);
             }
 
-
+            if (game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM')) {
+                // Whisper the card instructions to the DM
+                this._whisperCardInstructions(deckName, id, name, front, desc);
+            }
         } catch (error) {
             LogUtility.error("Error rendering CardDraw.draw():", error);
         }
@@ -91,13 +110,14 @@ class CardDealer {
 
     /**
      * View a card (but do not draw it)
-     * @param {string} card This can be the card ID or the card's exact name.
+     * @param {Array|string} cards This can be an array of strings or a single string, which can be the card ID or exact name.
      * @param {boolean} faceDown Optional, tells the viewer whether to render the card face-down or not (default is yes)
      * @param {boolean} whisper Optional, tells the viewer whether to whisper the card details to the DM on view (default is yes)
+     * @param {boolean} dramaticReveal Optional, tells the viewer whether to show the card facedown at first, then automatically flip it over after a 1/2 sec (default is no)
      * @param {boolean} share Optional, tells the viewer whether to share to all players or not (default is no)
      * @returns 
      */
-    async view(card, faceDown, whisper, share) {
+    async view(cards, faceDown, whisper, dramaticReveal, share) {
         try {
             const deck = this.deck;
             const deckName = this.deckName;
@@ -105,36 +125,51 @@ class CardDealer {
             const doWhisper = whisper;
             const shareToAll = share;
 
-            if (!card) {
+            // Normalize cards input to always be an array
+            const cardsArray = Array.isArray(cards) ? cards : [cards];
+
+            if (!cardsArray || cardsArray.length === 0) {
                 LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardIdNotProvided")); // "Please provide a card name or ID."
                 return;
             }
 
-            // Get card by name
-            const cardToView = deck.cards.get(card) || deck.cards.getName(card);
-            if (!cardToView) {
-                LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
-                return;
-            }
+            const cardImgsArray = [];
 
-            // Extract card properties
-            const { id, name, front, back, desc } = this._extractCardProperties(cardToView);
+            cardsArray.forEach(async (card) => {
+                let cardToView = this._findCardAnywhere(card);
+
+                if (!cardToView) {
+                    LogUtility.warn(card + ': ' + game.i18n.localize(MODULE_L18N_PREFIX + ".notification.cardNotFound")); // "No card by that ID or name was found."
+                    return;
+                }
+
+                // Extract card properties
+                const { id, name, front, back, desc } = this._extractCardProperties(cardToView);
+
+                cardImgsArray.push({ front, back });
+
+                if (doWhisper) {
+                    // Whisper the card instructions to the DM
+                    this._whisperCardInstructions(deckName, id, name, front, desc);
+                }
+            });
 
             // Display with fancy card viewer module
             new FancyDisplay({
-                imgFrontPath: front,
-                imgBackPath: back,
-                faceDown: showFaceDown
-            }).render(shareToAll);
-
-            if (doWhisper) {
-                // Whisper the card instructions to the DM
-                this._whisperCardInstructions(deckName, id, name, front, desc);
-            }
+                imgArray: cardImgsArray,
+                faceDown: showFaceDown,
+            }).render(shareToAll, dramaticReveal);
 
         } catch (error) {
             LogUtility.error("Error rendering CardView.view():", error);
         }
+    }
+
+    // Given a card ID string, find and return the card no matter what stack it currently lives in (because it can move around)
+    _findCardAnywhere(cardStr) {
+        let card = game.cards.find(stack => stack.cards.get(cardStr))?.cards.get(cardStr);
+        card = card || game.cards.find(stack => stack.cards.getName(cardStr))?.cards.getName(cardStr);
+        return card;
     }
 
     // Get the discard pile by name, or smart detect a discard pile's existence and get that, or create a new one.

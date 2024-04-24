@@ -34,9 +34,10 @@ A quick demo showcasing 2 macros that will draw a random card from a given deck 
 You'll need to import all the macros from the compendium in this module and customize them.
 
 ## Draw a Card
-1. Replace 'Deck of Many Things' with name of a deck in your world.
-2. Replace 'My Discard Pile' with the name of a pile in your world.
-3. If you set share to true, everyone logged in FVTT will see the card.
+1. Replace `'Deck of Many Things'` with name of a deck in your world.
+2. Replace `'My Discard Pile'` with the name of a pile in your world.
+3. If you set `share` to true, everyone logged in FVTT will see the card immediately when drawn.
+4. `face` determines how the card is initially displayed. This var can be ommitted, or set to "UP", "DOWN", or "REVEAL" to flip the card face-up with animation.
 
 ```
 // Draws, views, and discards a card from a given deck name. Leave discardPile null to smart-match an existing discard pile name or auto-create a new one named "[your deck name] - Discard Pile".
@@ -44,16 +45,17 @@ You'll need to import all the macros from the compendium in this module and cust
 let deckName = 'Deck of Many Things';
 let discardPile = 'My Discard Pile';
 let share = true;
+let face = "REVEAL"; //either "UP", "DOWN", or "REVEAL" to flip up
 
 OrcnogFancyCardDealer({
    deckName: deckName ,
    discardPileName: discardPile
-}).draw(share);
+}).draw(share, face);
 ```
 
 ## View a Card
-1. Replace 'Deck of Many Things' with name of a deck in your world.
-2. Replace 'Gem' with the name of a card in the deck or the UID.
+1. Replace `'Deck of Many Things'` with name of a deck in your world.
+2. Replace `'Gem'` with the name of a card in the deck or the UID.
 3. set faceDown to true and the card will shown flipped.
 4. If you set share to true, everyone logged in FVTT will see the card.
 
@@ -73,11 +75,11 @@ OrcnogFancyCardDealer({
 
 ## View Any Image as a Card
 
-1. Replace 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp' with a path or URL to any image you want.
-2. You can replace 'modules/orcnog-card-viewer/assets/orcnogback.webp' with a path or URL to any card back image.
-3. borderColor can change the border color.
-4. borderWidth can change the colored border thickness.
-5. shareToAll will show to everyone.
+1. Replace `'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp'` with a path or URL to any image you want.
+2. You can replace `'modules/orcnog-card-viewer/assets/orcnogback.webp'` with a path or URL to any card back image.
+3. `borderColor` can change the border color.
+4. `borderWidth` can change the colored border thickness.
+5. `shareToAll` will show to everyone.
 
 ```
 // Requires Orcnog's Card Viewer
@@ -282,3 +284,6 @@ Completes localization or all client-facing or language-functional strings. Atte
 
 ## v0.2.0
 Handle for Pass and Draw (to a hand) actions, with new settings to handle whether those trigger card views. Module now depends on socketlib. Moevs several values to a new CONSTS file. Fixed an annoyance where it searched for a discard pile every time, even if just viewing a card.
+
+## v0.3.0
+Multiple cards are now grouped into a single display. "Dramatic reveal" (I know, corny name), is now implemented to show cards face-down at first, but then auto-flip them over after a small (dramatic?) delay.  Several new settings added to add fine control over display behaviors based on specific card actions, e.g. on the Deal action, always show cards face-up, but on Draw action, show them face-down, while on Pass actions, show them with a dramatic reveal (flip from face-down to -up automagically).  Settings menu has also been enhanced with collapsible groups of settings.  The grouping of multiple cards into a single viewer was enough to merit a new minor version on its own, but with all the enhancements to settings, dramatic reveal, and a few other things crossed off the TODO list, I'm happy with calling this a new minor version.  After a few weeks/months of beta testing, I may as well call this version 1.0, but cart/horse.
