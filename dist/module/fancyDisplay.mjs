@@ -25,7 +25,8 @@ class FancyDisplay {
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
             const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
             const share = shareToAll;
-
+            const dramaticRevealDelayMs = game.settings.get(MODULE_ID, 'dramaticRevealDelay');
+            
             if (this.imgArray.length > 0) {
                 const dialogWidth = "100vw";
                 const dialogHeight = "100vh";
@@ -114,7 +115,7 @@ class FancyDisplay {
                                     flipAllIndex++;
                                     if (flipAllIndex === wrpCardFlips.length) clearInterval(flipAll);
                                 }, 80);
-                            }, 500);
+                            }, dramaticRevealDelayMs);
                         }
 
                         function _pRenderStgCard_onMouseMove_mutElements ({mouseX, mouseY, wrpCard, dispGlint}) {

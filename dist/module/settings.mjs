@@ -8,7 +8,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     // Enable/disable whispering card details to the DM on view.
     game.settings.register(MODULE_ID, 'enableWhisperCardTextToDM', {
@@ -17,7 +17,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     // Enable/disable displaying cards when they are drawn into a hand, or with the Draw a Card macro or other cardDealer.draw() call.
     game.settings.register(MODULE_ID, 'enableDisplayOnDraw', {
@@ -26,7 +26,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     game.settings.register(MODULE_ID, 'whatDeterminesCardFaceOnDraw', {
         name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.whatDeterminesCardFaceOnDraw.name`), // "Show face-up/down on Draw",
@@ -48,7 +48,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     // Enable/disable displaying cards when they are dealt.
     game.settings.register(MODULE_ID, 'enableDisplayOnDeal', {
@@ -57,7 +57,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     game.settings.register(MODULE_ID, 'whatDeterminesCardFaceOnDeal', {
         name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.whatDeterminesCardFaceOnDeal.name`), // "Show face-up/down on Deal",
@@ -79,7 +79,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     // Enable/disable displaying cards when they are passed.
     game.settings.register(MODULE_ID, 'enableDisplayOnPass', {
@@ -88,7 +88,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     game.settings.register(MODULE_ID, 'whatDeterminesCardFaceOnPass', {
         name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.whatDeterminesCardFaceOnPass.name`), // "Show face-up/down on Pass",
@@ -110,7 +110,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: true,
-        type: Boolean
+        type: Boolean,
     });
     // Configure default card border thickness.
     game.settings.register(MODULE_ID, 'defaultCardBorderWidth', {
@@ -119,7 +119,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: '8px',
-        type: String
+        type: String,
     });
     // Configure default card border color.
     game.settings.register(MODULE_ID, 'defaultCardBorderColor', {
@@ -128,7 +128,7 @@ export const registerSettings = function() {
         scope: 'world',
         config: true,
         default: '#d29a38',
-        type: String
+        type: String,
     });
     // Configure default card back image.
     game.settings.register(MODULE_ID, 'defaultCardBackImage', {
@@ -138,7 +138,16 @@ export const registerSettings = function() {
         config: true,
         default: `modules/${MODULE_ID}/assets/cardbacks/orcnogback.webp`,
         type: String,
-        filePicker: 'image'
+        filePicker: 'image',
+    });
+    // Configure dramatic reveal delay (ms).
+    game.settings.register(MODULE_ID, 'dramaticRevealDelay', {
+        name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.dramaticRevealDelay.name`), // "Dramatic reveal delay (ms)",
+        hint: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.dramaticRevealDelay.hint`), // "Configure the number of milliseconds to delay before automiatcally flipping a card to face-up, when a \"Dramtic Reveal\" setting is enabled for a particular action. Default is 500 (half a second).",
+        scope: 'world',
+        config: true,
+        default: 500,
+        type: Number,
     });
 }
 
