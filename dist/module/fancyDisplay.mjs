@@ -3,35 +3,38 @@ import { LogUtility } from "./log.mjs";
 import { CardViewerSocket } from './hooks.mjs';
 
 class FancyDisplay {
-    constructor({imgFrontPath, imgBackPath, borderColor, borderWidth, faceDown}) {
-        this.imgFrontPath = imgFrontPath;
-        this.imgBackPath = imgBackPath;
+    constructor({imgArray, borderColor, borderWidth, faceDown}) {
+        this.imgArray = imgArray;  // This now holds an array of objects with imgFrontPath and imgBackPath
         this.borderColor = borderColor;
         this.borderWidth = borderWidth;
         this.faceDown = faceDown;
     }
 
-    async render(shareToAll) {
+    async render(shareToAll, dramaticReveal) {
         try {
             // Specify the image URL or file path
             const FancyDisplay = this;
-            if (!this.imgBackPath) this.imgBackPath = game.settings.get(MODULE_ID, 'defaultCardBackImage');
-            const imgFrontPath = this.faceDown ? this.imgBackPath : this.imgFrontPath;
-            const imgBackPath = this.faceDown ? this.imgFrontPath : this.imgBackPath;
+            // Default paths for back images if not provided
+            this.imgArray.forEach(image => {
+                if (!image.back) {
+                    image.back = game.settings.get(MODULE_ID, 'defaultCardBackImage');
+                }
+            });
+            const renderFaceDown = this.faceDown;
+            const renderDramaticReveal = dramaticReveal;
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
             const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
             const share = shareToAll;
 
-            if (imgFrontPath) {
+            if (this.imgArray.length > 0) {
                 const dialogWidth = "100vw";
                 const dialogHeight = "100vh";
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(front, back, borderColor, borderWidth) {
+                    constructor(images, borderColor, borderWidth) {
                         super();
-                        this.imgFrontPath = front;
-                        this.imgBackPath = back;
+                        this.images = images; // This now holds the entire array of image objects
                         this.borderWidth = borderWidth;
                         this.borderColor = borderColor;
                     }
@@ -47,51 +50,72 @@ class FancyDisplay {
                         });
                     }
 
-                    activateListeners (html) {
-                        LogUtility.debug("A popout was rendered.")
+                    activateListeners(html) {
+                        LogUtility.debug("A popout was rendered.");
                         this.jsEvents(html[0]);
                     }
 
                     async jsEvents (html) {
                         // JS manipulation - 85 percent of this code is 100 percent ripped off from https://{FIVE}e.tools/js/decks.js
                         const wrpDrawn = html.querySelector('.decks-draw__stg');
-                        const dispGlint = html.querySelector('.decks-draw__disp-glint');
-                        const wrpCard = html.querySelector('.decks-draw__wrp-card');
-                        const wrpCardFlip = html.querySelector('.decks-draw__wrp-card-flip');
+                        const wrpCards = html.querySelectorAll('.decks-draw__wrp-card');
+                        const wrpCardFlips = html.querySelectorAll('.decks-draw__wrp-card-flip');
                         const shareBtn = html.querySelector(`.${MODULE_ID}-share-btn`);
-
-                        if (imgBackPath) {
-                            const btnFlip = html.querySelector(`.${MODULE_ID}-flip-button`);
-                            btnFlip.addEventListener("click", (evt) => {
+                    
+                        wrpCardFlips.forEach(wrpCardFlip => {
+                            const btnFlip = wrpCardFlip.querySelector(`.${MODULE_ID}-flip-button`);
+                            if (btnFlip) {
+                                btnFlip.addEventListener("click", (evt) => {
+                                    evt.stopPropagation();
+                                    wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
+                                });
+                            }
+                        });
+                    
+                        wrpCards.forEach(wrpCard => {
+                            wrpCard.addEventListener("click", (evt) => {
                                 evt.stopPropagation();
-                                wrpCardFlip.classList.toggle("decks-draw__wrp-card-flip--flipped");
+                            });
+                        });
+                    
+                        if (shareBtn) {
+                            shareBtn.addEventListener("click", (evt) => {
+                                evt.stopPropagation();
+                                shareBtn.disabled = true;
+                                FancyDisplay._shareToAll();
                             });
                         }
-
-                        wrpCard.addEventListener("click", (evt) => {
-                            evt.stopPropagation();
-                        });
-
-                        shareBtn?.addEventListener("click", (evt) => {
-                            evt.stopPropagation();
-                            shareBtn.disabled = true;
-                            FancyDisplay._shareToAll();
-                        });
-
+                    
                         wrpDrawn.addEventListener("click", (evt) => {
                             evt.stopPropagation();
-                            // html.remove(); // remove this
+                            // html.remove(); // Consider more specific or controlled removal if needed
                             $(`.${MODULE_ID}`).remove(); // remove ALL
                         });
-
+                    
                         wrpDrawn.addEventListener("mousemove", (evt) => {
                             const mouseX = evt.clientX;
                             const mouseY = evt.clientY;
-
+                    
                             requestAnimationFrame(() => {
-                                _pRenderStgCard_onMouseMove_mutElements({ mouseX, mouseY, wrpCard, dispGlint });
+                                wrpCards.forEach(wrpCard => {
+                                    const dispGlint = wrpCard.querySelector('.decks-draw__disp-glint');
+                                    _pRenderStgCard_onMouseMove_mutElements({mouseX, mouseY, wrpCard, dispGlint});
+                                });
                             });
                         });
+
+                        // Automatically flip all cards over (animated), if they are supposed to be face up.
+                        if (dramaticReveal && !renderFaceDown) {
+                            setTimeout(() => {
+                                // After 1/2 a second, start the interval
+                                let flipAllIndex = 0;
+                                let flipAll = setInterval(() => {
+                                    wrpCardFlips[flipAllIndex]?.classList.remove('decks-draw__wrp-card-flip--flipped');
+                                    flipAllIndex++;
+                                    if (flipAllIndex === wrpCardFlips.length) clearInterval(flipAll);
+                                }, 80);
+                            }, 500);
+                        }
 
                         function _pRenderStgCard_onMouseMove_mutElements ({mouseX, mouseY, wrpCard, dispGlint}) {
                             const perStyles = _pRenderStgCard_getPerspectiveStyles({mouseX, mouseY, ele: wrpCard});
@@ -182,8 +206,9 @@ class FancyDisplay {
                         data.moduleId = MODULE_ID;
                         data.isGM = game.user.isGM;
                         data.showShareBtn = !share;
-                        data.imgFront = this.imgFrontPath;
-                        data.imgBack = this.imgBackPath;
+                        data.images = this.images;
+                        data.dramaticReveal = renderDramaticReveal;
+                        data.faceDown = renderFaceDown;
                         data.hasBorder = parseInt(this.borderWidth) !== 0;
                         data.borderColor = this.borderColor;
                         data.borderWidth = this.borderWidth;
@@ -192,12 +217,12 @@ class FancyDisplay {
                     }
                 }
 
-                const customPopout = new CustomPopout(imgFrontPath, imgBackPath, borderColor, borderWidth);
+                const customPopout = new CustomPopout(this.imgArray, borderColor, borderWidth);
                 customPopout.render(true);
 
                 // Check if the user is the GM
                 if (share && game.user.isGM) {
-                    this._shareToAll();
+                    FancyDisplay._shareToAll(this.imgArray);
                 }
 
             } else {
@@ -212,8 +237,7 @@ class FancyDisplay {
         // Emit a socket message to all players
         LogUtility.debug(`Firing 'ShareToAll' hook.`)
         CardViewerSocket.executeForOthers('ShareToAll', {
-            imgFrontPath: this.imgFrontPath,
-            imgBackPath: this.imgBackPath,
+            imgArray: this.imgArray,
             borderColor: this.borderColor,
             borderWidth: this.borderWidth,
             faceDown: this.faceDown,

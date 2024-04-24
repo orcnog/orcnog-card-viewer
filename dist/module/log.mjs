@@ -23,10 +23,24 @@ export class LogUtility {
     /**
      * Sends an error log to the console and displays an error UI notification.
      * @param {String} logString The string to log as an error. 
+     * @param {Error|Object} errorOrOptions An error object if there was an exception, or options if customizing the behavior.
+     * @param {Object} [additionalOptions] Options to use if an error object is provided as the second argument.
      */
-    static error(logString, options = {}) {
+    static error(logString, errorOrOptions = {}, additionalOptions = {}) {
+        let options;
+        let error;
+
+        // Check if the second parameter is an error object
+        if (errorOrOptions instanceof Error) {
+            error = errorOrOptions;
+            options = additionalOptions;
+        } else {
+            options = errorOrOptions;
+        }
+
         if (options.ui ?? true) ui.notifications.error(logString, { console: false });
         if (options.console ?? true) console.error(..._processLog(logString));
+        if (!!error && (options.console ?? true)) console.error(error);
     }
 
     /**
