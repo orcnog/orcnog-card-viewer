@@ -284,3 +284,6 @@ Completes localization or all client-facing or language-functional strings. Atte
 
 ## v0.2.0
 Handle for Pass and Draw (to a hand) actions, with new settings to handle whether those trigger card views. Module now depends on socketlib. Moevs several values to a new CONSTS file. Fixed an annoyance where it searched for a discard pile every time, even if just viewing a card.
+
+## v0.3.0
+Multiple cards are now grouped into a single display. "Dramatic reveal" (I know, corny name), is now implemented to show cards face-down at first, but then auto-flip them over after a small (dramatic?) delay.  Several new settings added to add fine control over display behaviors based on specific card actions, e.g. on the Deal action, always show cards face-up, but on Draw action, show them face-down, while on Pass actions, show them with a dramatic reveal (flip from face-down to -up automagically).  Settings menu has also been enhanced with collapsible groups of settings.  The grouping of multiple cards into a single viewer was enough to merit a new minor version on its own, but with all the enhancements to settings, dramatic reveal, and a few other things crossed off the TODO list, I'm happy with calling this a new minor version.  After a few weeks/months of beta testing, I may as well call this version 1.0, but cart/horse.
