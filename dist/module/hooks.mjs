@@ -278,6 +278,10 @@ export default function registerHooks() {
 
 // TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
+// TOFIX: Update the README with all the new settings. Stretch goal: update the GIFs.
+
+// TOFIX: Some macros are a bit outdated now.
+
 
 
 // TODO: "Watch me flip".  Let the sharer control when the card is flipped for all other viewers (and suppress viewers' ability to flip or exit view).
@@ -290,13 +294,7 @@ export default function registerHooks() {
 
 // TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
 
-// TODO: Write a "Draw Cards" macro that can draw from a deck into a hand.
-
-// TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
-
-// TODO: Convert all jQuery to raw JS.
-
-// TODO: Add more custom macro icons to /assets? For drawing multiple cards?
+// TODO: Write a "Draw Cards" macro that can draw one or more cards from a deck into a hand.
 
 // TODO: Support non-card images...
     // TODO: Support max-height sizing for images that aren't nec card-shaped.
@@ -304,12 +302,15 @@ export default function registerHooks() {
     // TODO: Add options to remove glint affects (for non-card images)
     // TODO: Add simple image macros back once support is satisfactory.
 
+// TODO: Clean up hooks.mjs so it's just an index of hooks/events ponting to abstracted handler functions -- i.e. move all the handler code from hooks.mjs into another script.
+
+// TODO: Convert all jQuery to raw JS.
+
 
 
 // TODO: Stretch Goal - Display multiple cards more like hand-held - in a slight arc, maybe even overlapping.
 
 // TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
-
 
 // TODO: MAYBE Stretch Goal - Add sound FX for flip, draw, deal, pass, and maybe shuffle.
 
