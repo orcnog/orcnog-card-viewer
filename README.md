@@ -290,3 +290,6 @@ Multiple cards are now grouped into a single display. "Dramatic reveal" (I know,
 
 ## v0.3.1
 Quick bug fix: .viewImage and .viewImageAsCard api methods and global OrcnogFancyDisplay() and OrcnogFancyImage() functions broke in v0.3.0 after the image input for the fancyDisplay class was converted from singular fonr/back img params to an Array (to support multiple cards in one view).  This fix ought to solve that before ppl start logging bugs.
+
+## v0.3.2
+Updated to Foundry v12 (verified in module.json). Also updated the TODOs a bit.
