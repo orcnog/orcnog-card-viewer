@@ -29,6 +29,8 @@
   "ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.hint": "Configure the default card back image on images viewed as cards.",
   "ORCNOG_CARD_VIEWER.settings.dramaticRevealDelay.name": "Dramatic reveal delay (ms)",
   "ORCNOG_CARD_VIEWER.settings.dramaticRevealDelay.hint": "Configure the number of ms to delay before automiatcally flipping a card to face-up, when a \"Dramtic Reveal\" setting is enabled for a particular action. Default is 500 (half a second).",
+  "ORCNOG_CARD_VIEWER.settings.playersCanShareToAll.name": "Enable the Share To All Feature for Players",
+  "ORCNOG_CARD_VIEWER.settings.playersCanShareToAll.hint": "The Share To All feature (e.g. the eyeball in the top-right of the card display screen, and a few macro/api functions) is only enabled for the GM by default.",
   "ORCNOG_CARD_VIEWER.notification.imagePathNotProvded": "Image URL or file path not provided.",
   "ORCNOG_CARD_VIEWER.notification.gmNotFound": "GM user not found.",
   "ORCNOG_CARD_VIEWER.notification.deckNameNotProvided": "Deck name not provided.",
