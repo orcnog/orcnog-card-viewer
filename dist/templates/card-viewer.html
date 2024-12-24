@@ -1,8 +1,6 @@
 <div class="{{moduleId}} {{#if hasBorder}}has-border{{/if}}" style="--rgb-card-glint--edge: {{#if glintColor}}{{glintColor}}{{else}}transparent{{/if}}; --rgb-card-border-color: {{borderColor}}; --px-card-border-width: {{borderWidth}};">
     <div class="{{moduleId}}-stage decks-draw__stg ve-flex-vh-center decks-draw__stg--visible">
-        {{#if isGM}}
-            {{#if showShareBtn}}<button class="{{moduleId}}-share-btn" data-tooltip="{{localize 'ORCNOG_CARD_VIEWER.ui.showToPlayersButtonLabel'}}"><i class="fas fa-eye"></i></button>{{/if}}
-        {{/if}}
+        {{#if showShareBtn}}<button class="{{moduleId}}-share-btn" data-tooltip="{{localize 'ORCNOG_CARD_VIEWER.ui.showToPlayersButtonLabel'}}"><i class="fas fa-eye"></i></button>{{/if}}
         <div class="{{moduleId}}-safe-viewing-area ve-flex-vh-center no-select relative">
             <div class="decks-draw__wrp-sparkle-sway ve-flex-col absolute"
                 style="top: 78.5134%; left: 87.2804%; width: min(67%, 280px); height: min(67%, 280px); animation-duration: 12750.1ms; animation-delay: -3181.44ms;">

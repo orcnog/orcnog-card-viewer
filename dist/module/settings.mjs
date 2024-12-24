@@ -149,6 +149,15 @@ export const registerSettings = function() {
         default: 500,
         type: Number,
     });
+    // Configure whether players can show the eyeball ShareBtn
+    game.settings.register(MODULE_ID, 'playersCanShareToAll', {
+        name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.playersCanShareToAll.name`), // "Enable the Share To All Feature for Players",
+        hint: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.playersCanShareToAll.hint`), // "The Share To All feature (e.g. the eyeball in the top-right of the card display screen) is only enabled for the GM by default.",
+        scope: 'world',
+        config: true,
+        default: false,
+        type: Boolean,
+    });
 }
 
 export function onRenderSettingsConfig(settingsConfig, html, user) {

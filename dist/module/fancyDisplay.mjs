@@ -25,6 +25,7 @@ class FancyDisplay {
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
             const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
             const share = shareToAll;
+            const playersCanShareToAll = game.settings.get(MODULE_ID, 'playersCanShareToAll');
             const dramaticRevealDelayMs = game.settings.get(MODULE_ID, 'dramaticRevealDelay');
             
             if (this.imgArray.length > 0) {
@@ -206,7 +207,7 @@ class FancyDisplay {
                         const data = super.getData();
                         data.moduleId = MODULE_ID;
                         data.isGM = game.user.isGM;
-                        data.showShareBtn = !share;
+                        data.showShareBtn = !share && (game.user.isGM || playersCanShareToAll);
                         data.images = this.images;
                         data.dramaticReveal = renderDramaticReveal;
                         data.faceDown = renderFaceDown;
@@ -222,7 +223,7 @@ class FancyDisplay {
                 customPopout.render(true);
 
                 // Check if the user is the GM
-                if (share && game.user.isGM) {
+                if (share && (game.user.isGM || playersCanShareToAll)) {
                     FancyDisplay._shareToAll(this.imgArray);
                 }
 
