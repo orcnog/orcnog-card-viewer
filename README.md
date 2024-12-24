@@ -293,3 +293,6 @@ Quick bug fix: .viewImage and .viewImageAsCard api methods and global OrcnogFanc
 
 ## v0.3.2
 Updated to Foundry v12 (verified in module.json). Also updated the TODOs a bit.
+
+## v0.3.3
+Adds the ability to enable Share To All features for players (not just for GM)
