@@ -296,3 +296,6 @@ Updated to Foundry v12 (verified in module.json). Also updated the TODOs a bit.
 
 ## v0.3.3
 Adds the ability to enable Share To All features for players (not just for GM)
+
+## v0.3.4
+Updates macros for v12. Updates hooks.mjs to be more DRY, updates Deal to Draw action in cardDealer.mjs, and also handles for the common error thrown by FVTT when you append something to an action string (ex: instead of 'draw', you pass 'draw ocv_nohook' as the action string, which fvtt doesn't like).
