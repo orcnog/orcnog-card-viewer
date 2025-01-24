@@ -10,9 +10,10 @@
 // A helper macro to automate drawing a random card and viewing it in a native Image Popout.
 // Updated for v12.
 
-let dealFrom_stackName = "Arcane - I"
+let dealFrom_stackName = "Deck of Many Things"
 let dealTo_stackName = "My Discard Pile"
 let drawMethod = "RANDOM" // either "RANDOM" or "TOP"
+let showToAll = true
 
 // Get reference to src/dst cards objects
 const src_cards = game.cards.getName(dealFrom_stackName)
@@ -22,15 +23,19 @@ console.log('dst_cards', dst_cards)
 // Deal 1 card and grab reference to the dealt card
 let isLikelySuccess = true
 let drawnCardsArr; // Variable to store the drawn card if module is not active
+
 try {
-  drawnCardsArr = await dst_cards.draw(src_cards, 1, {
-    how: CONST.CARD_DRAW_MODES[drawMethod]
+  drawnCardsArr = await src_cards.draw(dst_cards, 1, {
+    how: CONST.CARD_DRAW_MODES[drawMethod],
+    action: getActionString()
   })
 } catch (e) {
-  console.error('error dealing card:', e)
+  console.error('error drawing card:', e)
+  // Foundry doesn't like "draw ocv_nohook". Anything more than "draw" makes the Promise throw an error... yet it still draws the card before throwing the error... so, for our purposes, it worked!
+  // If it throws this known error, assume it actually succeeded.  Otherwise notify user of the error.
   if (e && e.message && !e.message.toLowerCase().includes('replace')) {
     ui.notifications.warn(e.message)
-    isLikelySuccess = false // Foundry doesn't like "deal ocv_nohook". Anything more than "deal" makes the Promise throw an error... yet it still deals the card first, therefore for our purposes, it worked.
+    isLikelySuccess = false
   }
 }
 if (isLikelySuccess) {
@@ -50,18 +55,21 @@ if (isLikelySuccess) {
   // Show it as an Image Popout...
   const ip = new ImagePopout(front, {})
   if (ip.render(true)) {
-    // Share the image with other connected players
-    ip.shareImage()
+    if (showToAll) {
+      // Share the image with other connected players
+      ip.shareImage()
+    }
   }
 
   // Whisper the card instructions to the DM
   const dm = game.users.find(u => u.isGM && u.active)
   if (dm) {
-    const messageContent = `<div class="card-draw orcnog-card-viewer-msg flexrow" data-deck="${dealFrom_stackName}" data-card="${cardId}" data-back="${back}">
-      <img class="card-face" src="${front}" alt="${name}"/>
-      <h4 class="card-name">${name}</h4>
-    </div>
-    <p>${desc}</p>`
+    const messageContent = `<p>Card(s) drawn:</p>
+      <div class="card-draw orcnog-card-viewer-msg flexrow" data-deck="${dealFrom_stackName}" data-card="${cardId}" data-back="${back}">
+        <img class="card-face" src="${front}" alt="${name}"/>
+        <h4 class="card-name">${name}</h4>
+      </div>
+      <p>${desc}</p>`
     ChatMessage.create({ content: messageContent, whisper: [dm._id] })
   } else {
     ui.notifications.warn("DM user not found.")
@@ -73,5 +81,5 @@ function isModuleActive() {
 }
 
 function getActionString() {
-  return isModuleActive() ? 'deal ocv_nohook' : 'deal'
+  return isModuleActive() ? 'draw ocv_nohook' : 'draw'
 }

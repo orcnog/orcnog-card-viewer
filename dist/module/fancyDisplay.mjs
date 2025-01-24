@@ -42,7 +42,7 @@ class FancyDisplay {
                     }
 
                     static get defaultOptions() {
-                        return mergeObject(super.defaultOptions, {
+                        return foundry.utils.mergeObject(super.defaultOptions, {
                             template: `modules/${MODULE_ID}/templates/card-viewer.html`,
                             popOut: false,
                             minimizable: true,
