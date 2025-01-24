@@ -205,72 +205,49 @@ export default function registerHooks() {
         // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
     });
 
-    // View on card "Deal" action
-
+    // Handles a card "Deal" action, or certain "Pass" actions
     Hooks.on('dealCards', (origin, destinations, context) => {
-        const isDeal = context.action.startsWith('deal');
-        const isPass = context.action.startsWith('pass');
-
-        // Exit early if necessary;
-        if (context.action.includes(`${MODULE_SHORT}_nohook`)) return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && isDeal) return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
-        if (context.toCreate.length === 0) return;
-      
-        // Show all cards that were dealt
-        const viewer = new CardDealer({
-            deckName: origin.name,
-            discardPileName: destinations.length ? destinations[0].name : null
-        });
-        const cards = [];
-        let drawnCards;
-        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-        const cardFaceLogic = game.settings.get(MODULE_ID, isDeal ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
-        const dramaticReveal = game.settings.get(MODULE_ID, isDeal ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
-        const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-        const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-        context.toCreate.forEach(dest => {
-            drawnCards = dest;
-            if (dest instanceof Array === false) drawnCards = [dest];
-            cards.push(...drawnCards.map(item => item._id));
-        });
-        const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
-        if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
+        handleCardExchange(origin, destinations, context)
     });
 
-    // View on card "Draw" action performed within a "Hand" stack
-
+    // Handles a card "Draw", "Pass", "Play", or "Discard" action
     Hooks.on('passCards', (origin, destinations, context) => {
-        const isDraw = context.action.startsWith('draw');
-        const isPass = context.action.startsWith('pass');
-
-        // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnDraw') && isDraw) return;
-        if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
-        if (context.toCreate.length === 0) return;
-      
-        // Show any and all cards that were dealt
-        const viewer = new CardDealer({
-            deckName: origin.name,
-            discardPileName: destinations instanceof Cards ? destinations.name : destinations.length ? destinations[0].name : null
-        });
-        const cards = [];
-        let drawnCards;
-        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-        const cardFaceLogic = game.settings.get(MODULE_ID, isDraw ? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
-        const dramaticReveal = game.settings.get(MODULE_ID, isDraw ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
-        const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
-        const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
-        context.toCreate.forEach(dest => {
-            drawnCards = dest;
-            if (dest instanceof Array === false) drawnCards = [dest];
-            cards.push(...drawnCards.map(item => item._id));
-        });
-        const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
-        if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
+        handleCardExchange(origin, destinations, context)
     });
 }
 
+export function handleCardExchange (origin, destinations, context) {
+    const isDeal = context.action.startsWith('deal');
+    const isDraw = context.action.startsWith('draw');
+    const isPass = context.action.startsWith('pass');
+
+    // Exit early if necessary;
+    if (context.action.includes(`${MODULE_SHORT}_nohook`)) return;
+    if (!game.settings.get(MODULE_ID, 'enableDisplayOnDeal') && isDeal) return;
+    if (!game.settings.get(MODULE_ID, 'enableDisplayOnDraw') && isDraw) return;
+    if (!game.settings.get(MODULE_ID, 'enableDisplayOnPass') && isPass) return;
+    if (context.toCreate.length === 0) return;
+  
+    // Show any and all cards that were dealt
+    const viewer = new CardDealer({
+        deckName: origin.name,
+        discardPileName: destinations instanceof Cards ? destinations.name : destinations.length ? destinations[0].name : null
+    });
+    const cards = [];
+    let drawnCards;
+    const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+    const cardFaceLogic = game.settings.get(MODULE_ID, isDraw || isDeal? 'whatDeterminesCardFaceOnDraw' : 'whatDeterminesCardFaceOnPass');
+    const dramaticReveal = game.settings.get(MODULE_ID, isDraw || isDeal ? 'enableDramaticRevealOnDraw' : 'enableDramaticRevealOnPass');
+    const shareToAll = context.action.includes(`${MODULE_SHORT}_doshare`);
+    const doView = !context.action.includes(`${MODULE_SHORT}_noshow`);
+    context.toCreate.forEach(dest => {
+        drawnCards = dest;
+        if (dest instanceof Array === false) drawnCards = [dest];
+        cards.push(...drawnCards.map(item => item._id));
+    });
+    const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
+    if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
+}
 
 // TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
 

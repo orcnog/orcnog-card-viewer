@@ -5,7 +5,7 @@ import argparse
 try:
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Update module folder")
-    parser.add_argument("--exclude-folder", default="packs/macros", help="Folder to exclude from update (default: packs/macros)")
+    parser.add_argument("--exclude-folder", default="packs", help="Folder to exclude from update (default: packs/)")
     args = parser.parse_args()
 
     # Get the current folder and module name

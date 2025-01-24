@@ -2,4 +2,7 @@ node_modules
 /releases
 /archive
 /ignore
+/macros/_compiled_jsons
+/macros/_compiled_levelDB
+/macros/_test_unpacked_jsons
 .env.local
