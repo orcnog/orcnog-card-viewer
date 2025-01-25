@@ -78,8 +78,9 @@ OrcnogFancyCardDealer({
 1. Replace `'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp'` with a path or URL to any image you want.
 2. You can replace `'modules/orcnog-card-viewer/assets/orcnogback.webp'` with a path or URL to any card back image.
 3. `borderColor` can change the border color.
-4. `borderWidth` can change the colored border thickness.
-5. `shareToAll` will show to everyone.
+5. `borderWidth` can change the colored border thickness.
+4. `glowColor` can change the card glow color.
+6. `shareToAll` will show to everyone.
 
 ```
 // Requires Orcnog's Card Viewer
@@ -89,6 +90,7 @@ let img = 'modules/orcnog-card-viewer/assets/beefy-abraham-lincoln.webp';
 let backImg = 'https://i.imgur.com/mStOCso.png'; // optional
 let borderColor = '#543'; // optional
 let borderWidth = '5px'; // optional
+let glowColor = 'rgba(200,200,255,0.4)'; // optional
 let shareToAll = true; // optional
 
 OrcnogFancyDisplay({
@@ -96,6 +98,7 @@ OrcnogFancyDisplay({
    back: backImg,
    border: borderColor,
    borderWidth: borderWidth
+   glowColor: glowColor,
 }).render(shareToAll)
 ```
 
@@ -299,3 +302,6 @@ Adds the ability to enable Share To All features for players (not just for GM)
 
 ## v0.3.4
 Updates macros for v12. Updates hooks.mjs to be more DRY, updates Deal to Draw action in cardDealer.mjs, and also handles for the common error thrown by FVTT when you append something to an action string (ex: instead of 'draw', you pass 'draw ocv_nohook' as the action string, which fvtt doesn't like).
+
+## v0.3.5
+Added a setting to control the card glow color. You can set the value to "transparent" if desired.

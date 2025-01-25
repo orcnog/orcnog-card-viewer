@@ -25,6 +25,8 @@
   "ORCNOG_CARD_VIEWER.settings.defaultCardBorderWidth.hint": "Configure the default border width on displayed cards.",
   "ORCNOG_CARD_VIEWER.settings.defaultCardBorderColor.name": "Default card border color",
   "ORCNOG_CARD_VIEWER.settings.defaultCardBorderColor.hint": "Configure the default border color on displayed cards.",
+  "ORCNOG_CARD_VIEWER.settings.defaultCardGlowColor.name": "Default card glow color",
+  "ORCNOG_CARD_VIEWER.settings.defaultCardGlowColor.hint": "Configure the default card shadow/glow color.",
   "ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.name": "Default card back image",
   "ORCNOG_CARD_VIEWER.settings.defaultCardBackImage.hint": "Configure the default card back image on images viewed as cards.",
   "ORCNOG_CARD_VIEWER.settings.dramaticRevealDelay.name": "Dramatic reveal delay (ms)",
