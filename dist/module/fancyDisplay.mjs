@@ -3,10 +3,11 @@ import { LogUtility } from "./log.mjs";
 import { CardViewerSocket } from './hooks.mjs';
 
 class FancyDisplay {
-    constructor({imgArray, borderColor, borderWidth, faceDown}) {
+    constructor({imgArray, borderColor, borderWidth, glowColor, faceDown}) {
         this.imgArray = imgArray;
         this.borderColor = borderColor;
         this.borderWidth = borderWidth;
+        this.glowColor = glowColor;
         this.faceDown = faceDown;
     }
 
@@ -24,6 +25,7 @@ class FancyDisplay {
             const renderDramaticReveal = dramaticReveal;
             const borderWidth = FancyDisplay._getBorderWidth(this.borderWidth);
             const borderColor = FancyDisplay._getBorderColor(this.borderColor, this.borderWidth);
+            const glowColor = FancyDisplay._getGlowColor(this.glowColor);
             const share = shareToAll;
             const playersCanShareToAll = game.settings.get(MODULE_ID, 'playersCanShareToAll');
             const dramaticRevealDelayMs = game.settings.get(MODULE_ID, 'dramaticRevealDelay');
@@ -34,11 +36,12 @@ class FancyDisplay {
 
                 // Create the custom display
                 class CustomPopout extends Application {
-                    constructor(images, borderColor, borderWidth) {
+                    constructor(images, borderColor, borderWidth, glowColor) {
                         super();
                         this.images = images; // This now holds the entire array of image objects
                         this.borderWidth = borderWidth;
                         this.borderColor = borderColor;
+                        this.glowColor = glowColor;
                     }
 
                     static get defaultOptions() {
@@ -212,6 +215,7 @@ class FancyDisplay {
                         data.dramaticReveal = renderDramaticReveal;
                         data.faceDown = renderFaceDown;
                         data.hasBorder = parseInt(this.borderWidth) !== 0;
+                        data.glowColor = this.glowColor;
                         data.borderColor = this.borderColor;
                         data.borderWidth = this.borderWidth;
                         data.glintColor = FancyDisplay._adjustToGlintColor(this.borderColor, );
@@ -219,7 +223,7 @@ class FancyDisplay {
                     }
                 }
 
-                const customPopout = new CustomPopout(this.imgArray, borderColor, borderWidth);
+                const customPopout = new CustomPopout(this.imgArray, borderColor, borderWidth, glowColor);
                 customPopout.render(true);
 
                 // Check if the user is the GM
@@ -243,6 +247,7 @@ class FancyDisplay {
             borderColor: this.borderColor,
             borderWidth: this.borderWidth,
             faceDown: this.faceDown,
+            glowColor: this.glowColor,
             shareToAll: true
         });
         LogUtility.log('You shared your card with everyone.')
@@ -331,6 +336,16 @@ class FancyDisplay {
             bcolor = game.settings.get(MODULE_ID, 'defaultCardBorderColor') || '#d29a38';
         }
         return bcolor;
+    }
+
+    _getGlowColor (input) {
+        let gcolor;
+        if (input) {
+            gcolor = input;
+        } else {
+            gcolor = game.settings.get(MODULE_ID, 'defaultCardGlowColor') || `rgb(210 154 56 / 30%)`;
+        }
+        return gcolor;
     }
 
 }

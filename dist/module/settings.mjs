@@ -130,6 +130,15 @@ export const registerSettings = function() {
         default: '#d29a38',
         type: String,
     });
+    // Configure default card glow color.
+    game.settings.register(MODULE_ID, 'defaultCardGlowColor', {
+        name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.defaultCardGlowColor.name`), // "Default card glow color",
+        hint: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.defaultCardGlowColor.hint`), // "Configure the default card glow/shadow color.",
+        scope: 'world',
+        config: true,
+        default: 'rgb(210 154 56 / 30%)',
+        type: String,
+    });
     // Configure default card back image.
     game.settings.register(MODULE_ID, 'defaultCardBackImage', {
         name: game.i18n.localize(`${MODULE_L18N_PREFIX}.settings.defaultCardBackImage.name`), // "Default card back image",

@@ -210,7 +210,7 @@
     border-radius: 3%;
     scale: 0;
     background-color: var(--rgb-card-border-color); /* #d29a38; */
-    box-shadow: 0 0 30px 10px rgb(210 154 56 / 30%);
+    box-shadow: 0 0 30px 10px var(--rgb-card-glow-color);
     color: rgb(255 255 255 / 53%);
 }
 

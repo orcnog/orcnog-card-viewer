@@ -110,11 +110,12 @@ export default function registerHooks() {
             },
             // Create a FancyDisplay instance and expose the whole thing
             // Example: `const myFancyViewer = await game.modules.get('orcnog-card-viewer').api.FancyDisplay({ front: imgPath });`
-            FancyDisplay: function ({ front, back = null, border = null, borderWidth = null, faceDown = true }) { // #d29a38
+            FancyDisplay: function ({ front, back = null, border = null, borderWidth = null, glowColor = null, faceDown = true }) { // #d29a38
                 return new FancyDisplay({
                     imgArray: [{ front, back }],
                     borderColor: border,
                     borderWidth: borderWidth,
+                    glowColor: glowColor,
                     faceDown: faceDown 
                 });
             },

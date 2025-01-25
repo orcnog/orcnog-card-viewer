@@ -1,4 +1,4 @@
-<div class="{{moduleId}} {{#if hasBorder}}has-border{{/if}}" style="--rgb-card-glint--edge: {{#if glintColor}}{{glintColor}}{{else}}transparent{{/if}}; --rgb-card-border-color: {{borderColor}}; --px-card-border-width: {{borderWidth}};">
+<div class="{{moduleId}} {{#if hasBorder}}has-border{{/if}}" style="--rgb-card-glint--edge: {{#if glintColor}}{{glintColor}}{{else}}transparent{{/if}}; --rgb-card-border-color: {{borderColor}}; --rgb-card-glow-color: {{glowColor}}; --px-card-border-width: {{borderWidth}};">
     <div class="{{moduleId}}-stage decks-draw__stg ve-flex-vh-center decks-draw__stg--visible">
         {{#if showShareBtn}}<button class="{{moduleId}}-share-btn" data-tooltip="{{localize 'ORCNOG_CARD_VIEWER.ui.showToPlayersButtonLabel'}}"><i class="fas fa-eye"></i></button>{{/if}}
         <div class="{{moduleId}}-safe-viewing-area ve-flex-vh-center no-select relative">
