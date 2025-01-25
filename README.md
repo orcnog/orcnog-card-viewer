@@ -305,3 +305,6 @@ Updates macros for v12. Updates hooks.mjs to be more DRY, updates Deal to Draw a
 
 ## v0.3.5
 Added a setting to control the card glow color. You can set the value to "transparent" if desired.
+
+## v0.3.6
+Fixes a bug in the macro: Draw and Show Card in Regular Popout

@@ -25,7 +25,7 @@ let isLikelySuccess = true
 let drawnCardsArr; // Variable to store the drawn card if module is not active
 
 try {
-  drawnCardsArr = await src_cards.draw(dst_cards, 1, {
+  drawnCardsArr = await dst_cards.draw(src_cards, 1, {
     how: CONST.CARD_DRAW_MODES[drawMethod],
     action: getActionString()
   })
