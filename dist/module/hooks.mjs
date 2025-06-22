@@ -298,8 +298,6 @@ function _registerCardImgClickInChat($html) {
 
 
 
-// TODO: Stretch Goal - Display multiple cards more like hand-held - in a slight arc, maybe even overlapping.
-
 // TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 
 // TODO: MAYBE Stretch Goal - Add sound FX for flip, draw, deal, pass, and maybe shuffle.

@@ -69,7 +69,7 @@
 }
 
 .orcnog-card-viewer .orcnog-card-viewer-safe-viewing-area {
-    max-width: 85vw;
+    max-width: 75vw;
     max-height: 85vh;
     width: 100%;
     height: 100%;
@@ -77,7 +77,7 @@
 
 .orcnog-card-viewer .orcnog-card-viewer-card-animation-container {
     display: flex;
-    column-gap: 3%;
+    column-gap: 1%;
     animation-name: anim-sway;
     animation-duration: 7s;
     animation-timing-function: linear;
@@ -187,6 +187,10 @@
 .orcnog-card-viewer .decks-draw__stg--visible {
     box-shadow: inset 0 0 100vh 100vh rgb(0 0 0 / 88%);
     transition: box-shadow 500ms;
+}
+
+.orcnog-card-viewer .decks-draw__wrp-sparkle-sway {
+    z-index: -1;
 }
 
 .orcnog-card-viewer .decks-draw__img-sparkle {
