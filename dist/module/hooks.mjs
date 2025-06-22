@@ -157,53 +157,17 @@ export default function registerHooks() {
     // View on card image click in a stack window
 
     Hooks.on('renderApplication', (app, $html, data) => {
-        // Exit early if necessary;
         if (app instanceof CardsConfig !== true) return;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
-
-        // Register card icon click handler
-        const $card_icon = $html.find('img.card-face');
-        $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
-            const id = $(event.target).closest('.card').data('card-id');
-            const deckCard = data.cards.find(c => c._id === id);
-            // Configs
-            const faceDown = deckCard.face === null;
-            const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-            const dramaticReveal = false;
-            const shareToAll = false;
-            // Set up viewer
-            if (id) new CardDealer({
-                deckName: deckCard.source.name
-            }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
-        });
-        // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+        _registerCardImgClickInDeck($html, data);
+    });
+    Hooks.on('renderCardsConfig', (CardDeckConfig, html, data) => { // for v13 compatibility
+        _registerCardImgClickInDeck($(html), data);
     });
 
     // View on card image click in chat messages
 
-    Hooks.on('renderChatMessage', (app, $html, data) => {
-        // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
-        if (!$html.find(`.message-content .${MODULE_ID}-msg`).length) return;
-
-        // Register card icon click handler
-        const $message = $html.find(`.${MODULE_ID}-msg`);
-        $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
-            // Configs
-            const faceDown = false;
-            const whisper = false;
-            const dramaticReveal = false;
-            const shareToAll = false;
-            // Set up viewer
-            const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
-            const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
-            if (deckName && cardId) new CardDealer({
-                deckName: deckName
-            }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
-        });
-
-        // TODO: Drag to canvas
-        // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+    Hooks.on('renderChatMessage', (app, $html) => {
+        _registerCardImgClickInChat($html);
     });
 
     // Handles a card "Deal" action, or certain "Pass" actions
@@ -248,6 +212,54 @@ export function handleCardExchange (origin, destinations, context) {
     });
     const faceDown = cardFaceLogic === 'source' ? drawnCards[0].face === null : cardFaceLogic === 'alwaysdown' ? true : false;
     if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
+}
+
+// Register card icon click handler in Chat
+function _registerCardImgClickInDeck($html, data) {
+    
+    // Exit early if necessary;
+    if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
+
+    // Register card icon click handler
+    $html.on(`click.${MODULE_SHORT}`, 'img.card-face, .cards img.face', (event) => {
+        const id = $(event.target).closest('li').data('card-id');
+        const deckCard = data.cards.find(c => c._id === id);
+        // Configs
+        const faceDown = deckCard.face === null;
+        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+        const dramaticReveal = false;
+        const shareToAll = false;
+        // Set up viewer
+        if (id) new CardDealer({
+            deckName: deckCard.source.name
+        }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
+    });
+    // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+}
+
+// Register card icon click handler in Chat
+function _registerCardImgClickInChat($html) {
+    // Exit early if necessary;
+    if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
+    if (!$html.find(`.message-content .${MODULE_ID}-msg`).length) return;
+
+    const $message = $html.find(`.${MODULE_ID}-msg`);
+    $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
+        // Configs
+        const faceDown = false;
+        const whisper = false;
+        const dramaticReveal = false;
+        const shareToAll = false;
+        // Set up viewer
+        const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
+        const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
+        if (deckName && cardId) new CardDealer({
+            deckName: deckName
+        }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
+    });
+
+    // TODO: Drag to canvas
+    // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
 }
 
 // TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.

@@ -38,7 +38,7 @@
 .orcnog-card-viewer {
     height: 100%;
     width: 100%;
-    position: relative;
+    position: absolute;
 }
 
 .orcnog-card-viewer * {
@@ -284,7 +284,8 @@
 }
 
 .chat-sidebar .orcnog-card-viewer-msg img.card-face,
-.cards-config .card img.card-face {
+.cards-config .card img.card-face,
+.cards-config .cards img.face {
     cursor: pointer;
 }
 
