@@ -12,8 +12,9 @@
 let deckName = 'Deck of Many Things';
 let discardPile = 'My Discard Pile';
 let share = true;
+let face = "reveal"; //either "up", "down", or "reveal" to flip up
 
 OrcnogFancyCardDealer({
-   deckName: deckName ,
+   deckName: deckName,
    discardPileName: discardPile
-}).draw(share);
+}).draw({share, face});

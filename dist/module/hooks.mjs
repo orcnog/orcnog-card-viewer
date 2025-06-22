@@ -78,12 +78,12 @@ export default function registerHooks() {
         game.modules.get(MODULE_ID).api = {
             // Draw a card
             // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true, false, true);`
-            draw: function (deckName, discardPileName, share = true, faceDown = true, dramaticReveal) {
+            draw: function (deckName, discardPileName, quantity = 1, share = true, faceDown = true, dramaticReveal) {
                 new CardDealer({
                     deckName: deckName,
                     discardPileName: discardPileName,
                     faceDown: faceDown,
-                }).draw(share, dramaticReveal);
+                }).draw({quantity, share, dramaticReveal});
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardNameOrID, true, true, true);`
@@ -264,8 +264,6 @@ function _registerCardImgClickInChat($html) {
 
 // TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
 
-// TOFIX: after a card is flipped, its perspective (expected to open face toward the cursor) is reversed.
-
 // TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
 // TOFIX: Update the README with all the new settings. Stretch goal: update the GIFs.
@@ -283,8 +281,6 @@ function _registerCardImgClickInChat($html) {
 // TODO: Now that multiple card displays work, add a FLIP-ALL button... or a GESTURE? like click-dragging across all cards flips the whole group?
 
 // TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
-
-// TODO: Write a "Draw Cards" macro that can draw one or more cards from a deck into a hand.
 
 // TODO: Support non-card images...
     // TODO: Support max-height sizing for images that aren't nec card-shaped.

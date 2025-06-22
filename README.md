@@ -45,12 +45,33 @@ You'll need to import all the macros from the compendium in this module and cust
 let deckName = 'Deck of Many Things';
 let discardPile = 'My Discard Pile';
 let share = true;
-let face = "REVEAL"; //either "UP", "DOWN", or "REVEAL" to flip up
+let face = "reveal"; //either "up", "down", or "reveal" to flip up
+
+OrcnogFancyCardDealer({
+   deckName: deckName,
+   discardPileName: discardPile
+}).draw({share, face});
+```
+
+## Draw Multiple Cards
+1. Replace `'Deck of Many Things'` with name of a deck in your world.
+2. Replace `'My Discard Pile'` with the name of a pile in your world.
+3. Set `quantity` to the number of cards you want to draw.
+4. If you set `share` to true, everyone logged in FVTT will see the card immediately when drawn.
+5. `face` determines how the card is initially displayed. This var can be ommitted, or set to "UP", "DOWN", or "REVEAL" to flip the card face-up with animation.
+
+```
+// Draws, views, and discards multiple card from a given deck name. Leave discardPile null to smart-match an existing discard pile name or auto-create a new one named "[your deck name] - Discard Pile".
+
+let deckName = 'Deck of Many Things';
+let discardPile = 'My Discard Pile';
+let quantity = 5;
+let share = true;
 
 OrcnogFancyCardDealer({
    deckName: deckName ,
    discardPileName: discardPile
-}).draw(share, face);
+}).draw({quantity, share});
 ```
 
 ## View a Card
@@ -156,23 +177,31 @@ This module ships with several API methods that can be leveraged in code, and a 
 
     // and later on...
 
-    let doShare = true;
-    myFancyDealer.draw(doShare);
+    let share = true;
+    myFancyDealer.draw({share});
     ```
 
-* ## .draw( args )
+* ## .draw( options )
     
-    Draws a Card from a given deck. This is a convenience method that simply constructs the same object as `api.CardDealer( options )`, and then automatically calls the `.draw( args )` method on that instance.
+    Draws a Card from a given deck. This is a convenience method that simply constructs the same object as `api.CardDealer( options )`, and then automatically calls the `.draw( options )` method on that instance.
 
-    Args:
+    Option Args:
     * `deckName` {String} - see: api.CardDealer > deckName
     * `discardPileName` {String} (optional) - see api.CardDealer > discardPileName
-    * `shareToAll` {Boolean} (optional) - whether the drawn card will be shared to all players (default is true)
+    * `quantity` {number} (optional) - the number of cards you want to draw (default is 1)
+    * `share` {Boolean} (optional) - whether the drawn card will be shared to all players (default is true)
+    * `face` {string} (optional) - Force the card to display as "UP", "DOWN", or "REVEAL" (for a dramatic reveal)
 
     Example:
 
     ```
-    game.modules.get('orcnog-card-viewer').api.draw(someDeckName, someDiscardPileName, true);
+    game.modules.get('orcnog-card-viewer').api.draw({
+        deckName: someDeckName,
+        discardPileName: someDiscardPileName,
+        quantity: 3,
+        share: true,
+        face: 'down'
+    });
     ```
 
 * ## .view( args )
@@ -247,7 +276,7 @@ These functions shuold be accessible at the global level. Use them in macros or 
 
     // and later on...
 
-    myFancyDealer.draw(true);
+    myFancyDealer.draw({share: true});
     ```
 * ## OrcnogFancyImage( options )
 
