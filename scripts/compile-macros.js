@@ -152,14 +152,21 @@ fs.readdirSync(MACROS_SOURCE_DIR).forEach(file => {
   const outputFileName = `${titleCaseName.replace(/ /g, '_')}_${id}.json`;
   const outputPath = path.join(MACROS_OUTPUT_DIR, outputFileName);
 
+  // Ensure the target directory exists
+  const outputDir = path.join(MACROS_OUTPUT_DIR);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+    console.log(`Created directory: ${outputDir}`);
+  }
+
   // Write the JSON file
   fs.writeFileSync(outputPath, JSON.stringify(macroData, null, 2));
   console.log(`_compiled ${file} -> ${outputFileName}`);
 });
 
 // After processing all files, pack them into LevelDB
-const packCommand = `fvtt package pack -n "macros" --id "${path.resolve(MACROS_OUTPUT_DIR)}" --od "${path.resolve(LEVELDB_OUTPUT_DIR)}"`;
-const testUnpackCommand = `fvtt package unpack -n "macros" --id "${path.resolve(LEVELDB_OUTPUT_DIR)}" --od "${path.resolve(TEST_UNPACKED_DIR)}"`;
+const packCommand = `fvtt package pack -n "macros" --in "${path.resolve(MACROS_OUTPUT_DIR)}" --out "${path.resolve(LEVELDB_OUTPUT_DIR)}"`;
+const testUnpackCommand = `fvtt package unpack -n "macros" --in "${path.resolve(LEVELDB_OUTPUT_DIR)}" --out "${path.resolve(TEST_UNPACKED_DIR)}"`;
 
 // Function to run a command and handle the results
 function runCommand(command) {
@@ -186,7 +193,7 @@ async function promptUser() {
 
     return new Promise((resolve) => {
         rl.question(chalk.yellow('Cross check the "_compiled_jsons" folder with the "_test_unpacked_jsons" folder -- the contents should match. If satisfied, press ENTER or "y" + ENTER to complete the process and copy the contents of the "_compiled_levelDB" folder into the "dist/packs/macros" folder now.\n\n') + 
-        chalk.green('Copy generated LDB files into dist/packs/macros? (y/n): '), (answer) => {
+        chalk.green('Copy generated LevelDB files into dist/packs/macros? (y/n): '), (answer) => {
             rl.close();
             resolve(answer.trim().toLowerCase() || 'yes'); // Accept ENTER as "yes"
         });

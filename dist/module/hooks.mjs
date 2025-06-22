@@ -78,12 +78,12 @@ export default function registerHooks() {
         game.modules.get(MODULE_ID).api = {
             // Draw a card
             // Example: `game.modules.get('orcnog-card-viewer').api.draw(deckName, discardPileName, true, false, true);`
-            draw: function (deckName, discardPileName, share = true, faceDown = true, dramaticReveal) {
+            draw: function (deckName, discardPileName, quantity = 1, share = true, faceDown = true, dramaticReveal) {
                 new CardDealer({
                     deckName: deckName,
                     discardPileName: discardPileName,
                     faceDown: faceDown,
-                }).draw(share, dramaticReveal);
+                }).draw({quantity, share, dramaticReveal});
             },
             // View a card
             // Example: `game.modules.get('orcnog-card-viewer').api.view(deckName, cardNameOrID, true, true, true);`
@@ -157,53 +157,17 @@ export default function registerHooks() {
     // View on card image click in a stack window
 
     Hooks.on('renderApplication', (app, $html, data) => {
-        // Exit early if necessary;
         if (app instanceof CardsConfig !== true) return;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
-
-        // Register card icon click handler
-        const $card_icon = $html.find('img.card-face');
-        $card_icon.on(`click.${MODULE_SHORT}`, (event) => {
-            const id = $(event.target).closest('.card').data('card-id');
-            const deckCard = data.cards.find(c => c._id === id);
-            // Configs
-            const faceDown = deckCard.face === null;
-            const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
-            const dramaticReveal = false;
-            const shareToAll = false;
-            // Set up viewer
-            if (id) new CardDealer({
-                deckName: deckCard.source.name
-            }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
-        });
-        // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+        _registerCardImgClickInDeck($html, data);
+    });
+    Hooks.on('renderCardsConfig', (CardDeckConfig, html, data) => { // for v13 compatibility
+        _registerCardImgClickInDeck($(html), data);
     });
 
     // View on card image click in chat messages
 
-    Hooks.on('renderChatMessage', (app, $html, data) => {
-        // Exit early if necessary;
-        if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
-        if (!$html.find(`.message-content .${MODULE_ID}-msg`).length) return;
-
-        // Register card icon click handler
-        const $message = $html.find(`.${MODULE_ID}-msg`);
-        $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
-            // Configs
-            const faceDown = false;
-            const whisper = false;
-            const dramaticReveal = false;
-            const shareToAll = false;
-            // Set up viewer
-            const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
-            const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
-            if (deckName && cardId) new CardDealer({
-                deckName: deckName
-            }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
-        });
-
-        // TODO: Drag to canvas
-        // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+    Hooks.on('renderChatMessage', (app, $html) => {
+        _registerCardImgClickInChat($html);
     });
 
     // Handles a card "Deal" action, or certain "Pass" actions
@@ -250,9 +214,55 @@ export function handleCardExchange (origin, destinations, context) {
     if (doView) viewer.view(cards, faceDown, whisper, dramaticReveal, shareToAll);
 }
 
-// TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
+// Register card icon click handler in Chat
+function _registerCardImgClickInDeck($html, data) {
+    
+    // Exit early if necessary;
+    if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
 
-// TOFIX: after a card is flipped, its perspective (expected to open face toward the cursor) is reversed.
+    // Register card icon click handler
+    $html.on(`click.${MODULE_SHORT}`, 'img.card-face, .cards img.face', (event) => {
+        const id = $(event.target).closest('li').data('card-id');
+        const deckCard = data.cards.find(c => c._id === id);
+        // Configs
+        const faceDown = deckCard.face === null;
+        const whisper = game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM');
+        const dramaticReveal = false;
+        const shareToAll = false;
+        // Set up viewer
+        if (id) new CardDealer({
+            deckName: deckCard.source.name
+        }).view([id], faceDown, whisper, dramaticReveal, shareToAll);
+    });
+    // TODO: Drag to canvas - $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+}
+
+// Register card icon click handler in Chat
+function _registerCardImgClickInChat($html) {
+    // Exit early if necessary;
+    if (!game.settings.get(MODULE_ID, 'enableCardIconClick')) return;
+    if (!$html.find(`.message-content .${MODULE_ID}-msg`).length) return;
+
+    const $message = $html.find(`.${MODULE_ID}-msg`);
+    $message.on(`click.${MODULE_SHORT}`, 'img.card-face', (event) => {
+        // Configs
+        const faceDown = false;
+        const whisper = false;
+        const dramaticReveal = false;
+        const shareToAll = false;
+        // Set up viewer
+        const deckName = $(event.target).closest(`.${MODULE_ID}-msg`).data('deck');
+        const cardId = $(event.target).closest(`.${MODULE_ID}-msg`).data('card');
+        if (deckName && cardId) new CardDealer({
+            deckName: deckName
+        }).view([cardId], faceDown, whisper, dramaticReveal, shareToAll);
+    });
+
+    // TODO: Drag to canvas
+    // $content.on('dragstart', '.dice-tray__button, .dice-tray__ad', (event) => {
+}
+
+// TOFIX: Use perspective(100vh) before and during flipping, to add some 3d depth to the flip.
 
 // TOFIX: border thickness is fixed, no matter how small the cards get.  can i make this relative to the card's size (%)?
 
@@ -272,8 +282,6 @@ export function handleCardExchange (origin, destinations, context) {
 
 // TODO: I think I can remove the necessity for "deck" and "deckName" in many places. May only need it for manual .draw() calls (i.e. from the macro).
 
-// TODO: Write a "Draw Cards" macro that can draw one or more cards from a deck into a hand.
-
 // TODO: Support non-card images...
     // TODO: Support max-height sizing for images that aren't nec card-shaped.
     // TODO: Support png / webp transparency (might be contingent on removing glint effects)
@@ -285,8 +293,6 @@ export function handleCardExchange (origin, destinations, context) {
 // TODO: Convert all jQuery to raw JS.
 
 
-
-// TODO: Stretch Goal - Display multiple cards more like hand-held - in a slight arc, maybe even overlapping.
 
 // TODO: Stretch Goal - add a param to opt into launching the FancyDisplay in a popout (vs full-screen, as is the default view) - and make this a module Setting.
 

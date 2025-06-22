@@ -41,14 +41,15 @@ class CardDealer {
         // Resolve the initialization promise to indicate completion
         this._initPromiseResolve();
     }
-
     // Draw one random card and display it
     /**
      * draw function
-     * @param {boolean} share whether to automatically share the card to all other players on display
-     * @param {string} forcedFace force the card to display as "UP", "DOWN", or "REVEAL" (for a dramatic reveal)
+     * @param {Object} options Options for drawing cards
+     * @param {number} options.quantity How many cards to draw (default is 1)
+     * @param {boolean} options.share Whether to automatically share the card to all other players on display
+     * @param {string} options.face Force the card to display as "up", "down", or "reveal" (for a dramatic reveal)
      */
-    async draw(share = true, forcedFace) {
+    async draw({ quantity = 1, share = true, face } = {}) {
         let deckName, deck, pile;
         try {
             await this.initPromise;
@@ -66,45 +67,55 @@ class CardDealer {
         }
 
         try {
-            // Draw 1 random card and grab reference to the drawn card
-            await pile.draw(deck, 1, {
+            // Draw 1 or more random cards and grab reference to the drawn card
+            await pile.draw(deck, quantity, {
                 how: CONST.CARD_DRAW_MODES.RANDOM,
                 action: `draw ${MODULE_SHORT}_nohook`
             });
         } catch(error) {
             // Foundry doesn't like "draw ocv_nohook". Anything more than "draw" makes the Promise throw an error... yet it still draws the card before throwing the error... so, for our purposes, it worked!
-            // If it throws this known error, assume it actually succeeded.  Otherwise notify user of the error.
-            if (error && error.message && !error.message.toLowerCase().includes('replace')) {
+            // If it throws one of these known errors, assume it actually succeeded.  Otherwise notify user of the error.
+            if (error && error.message
+                && !error.message.toLowerCase().includes('replace') //Chrome/Safari error
+                && !error.message.toLowerCase().includes('str is undefined')) // Firefox error
+            {
                 LogUtility.error(error, {ui: true});
                 return null;
             }
         }
 
         try {
-            const drawnCard = pile.cards.contents[pile.cards.size - 1];
+            const drawnCards = pile.cards.contents.slice(-quantity);
             const cardFaceLogic = game.settings.get(MODULE_ID, 'whatDeterminesCardFaceOnDraw');
-            const faceDown = (forcedFace == null) ? 
-                 (cardFaceLogic === "alwaysdown" ? true :
+            const faceDown =
+                  face && face.toLowerCase() === "down" ? true :
+                  face && (face.toLowerCase() === "up" || face.toLowerCase() === "reveal") ? false :
+                  cardFaceLogic === "alwaysdown" ? true :
                   cardFaceLogic === "alwaysup" ? false :
-                  drawnCard.face === null) :
-                 (forcedFace === "DOWN" ? true :
-                  (forcedFace === "UP" || forcedFace === "REVEAL") ? false : false);
-            const dramaticReveal = forcedFace === 'REVEAL' || (!forcedFace && game.settings.get(MODULE_ID, 'enableDramaticRevealOnDraw') === true);
+                  drawnCards[0].face || false; // if no forced `face`, then use the first card's face property (so, showing multiple cards in multiple faces is not supported.)
 
-            // Extract card properties
-            const { id, name, front, back, desc } = this._extractCardProperties(drawnCard);
+            const dramaticReveal = face && face.toLowerCase() === 'reveal' || (!face && game.settings.get(MODULE_ID, 'enableDramaticRevealOnDraw') === true);
+
+            // Prepare an array to hold the card images
+            const drawnArray = drawnCards.map(drawnCard => {
+                // Extract card properties
+                const { id, name, front, back, desc } = this._extractCardProperties(drawnCard);
+                return { id, name, front, back, desc };
+            });
 
             if (game.settings.get(MODULE_ID, 'enableDisplayOnDraw')) {
-                // Display with fancy card viewer module
+                // Display all cards with a single FancyDisplay instance
                 new FancyDisplay({
-                    imgArray: [{ front, back }],
+                    imgArray: drawnArray,
                     faceDown: faceDown,
                 }).render(share, dramaticReveal);
             }
 
             if (game.settings.get(MODULE_ID, 'enableWhisperCardTextToDM')) {
                 // Whisper the card instructions to the DM
-                this._whisperCardInstructions(deckName, id, name, front, desc);
+                drawnArray.forEach(({ id, name, front, desc }) => {
+                    this._whisperCardInstructions({ deckName, cardId: id, cardName: name, front, desc });
+                });
             }
         } catch (error) {
             LogUtility.error("Error rendering CardDraw.draw():", error);
@@ -153,7 +164,7 @@ class CardDealer {
 
                 if (doWhisper) {
                     // Whisper the card instructions to the DM
-                    this._whisperCardInstructions(deckName, id, name, front, desc);
+                    this._whisperCardInstructions({ deckName, cardId: id, cardName: name, front, desc });
                 }
             });
 
@@ -234,7 +245,7 @@ class CardDealer {
         return { id, name, front, back, desc, faceDown };
     }
 
-    _whisperCardInstructions(deckName, cardId, cardName, front, desc) {
+    _whisperCardInstructions({ deckName, cardId, cardName, front, desc }) {
         const dm = game.users.find(u => u.isGM && u.active);
         if (!dm) {
             LogUtility.warn(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.gmNotFound")); //"GM user not found."

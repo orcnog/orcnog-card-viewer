@@ -33,7 +33,10 @@ try {
   console.error('error drawing card:', e)
   // Foundry doesn't like "draw ocv_nohook". Anything more than "draw" makes the Promise throw an error... yet it still draws the card before throwing the error... so, for our purposes, it worked!
   // If it throws this known error, assume it actually succeeded.  Otherwise notify user of the error.
-  if (e && e.message && !e.message.toLowerCase().includes('replace')) {
+  if (e && e.message
+        && !e.message.toLowerCase().includes('replace') // Chrom/Safari/Electron error msg
+        && !e.message.toLowerCase().includes('str is undefined') // Firefox error msg
+    ){
     ui.notifications.warn(e.message)
     isLikelySuccess = false
   }
