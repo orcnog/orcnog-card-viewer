@@ -337,3 +337,6 @@ Added a setting to control the card glow color. You can set the value to "transp
 
 ## v0.3.6
 Fixes a bug in the macro: Draw and Show Card in Regular Popout
+
+## v0.4.0
+Updates compatibility to v13. Adds ability to draw multiple cards via macro / API. Now arranges multiple cards in a slight arc. Improves the perspective rotation so when the mouse is farthest, the rotation is slowest. Improves the positioning of the sparkles in the bg. Fixes a bug that made the module unusable in Firefox. Updates the README.
