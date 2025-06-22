@@ -32,11 +32,11 @@ The script runs the following commands:
 
 1. Pack macros into LevelDB:
    ```bash
-   fvtt package pack -n "macros" --id "path/to/compiled_jsons" --od "path/to/_compiled_levelDB"
+   fvtt package pack -n "macros" --in "path/to/compiled_jsons" --out "path/to/_compiled_levelDB"
    ```
 2. Unpack LevelDB:
    ```bash
-   fvtt package unpack -n "macros" --id "path/to/compiled_levelDB" --od "path/to/_test_unpacked_jsons"
+   fvtt package unpack -n "macros" --in "path/to/compiled_levelDB" --out "path/to/_test_unpacked_jsons"
    ```
 
 ### Note
