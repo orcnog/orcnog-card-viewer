@@ -73,8 +73,11 @@ class CardDealer {
             });
         } catch(error) {
             // Foundry doesn't like "draw ocv_nohook". Anything more than "draw" makes the Promise throw an error... yet it still draws the card before throwing the error... so, for our purposes, it worked!
-            // If it throws this known error, assume it actually succeeded.  Otherwise notify user of the error.
-            if (error && error.message && !error.message.toLowerCase().includes('replace')) {
+            // If it throws one of these known errors, assume it actually succeeded.  Otherwise notify user of the error.
+            if (error && error.message
+                && !error.message.toLowerCase().includes('replace') //Chrome/Safari error
+                && !error.message.toLowerCase().includes('str is undefined')) // Firefox error
+            {
                 LogUtility.error(error, {ui: true});
                 return null;
             }
