@@ -251,6 +251,7 @@ class FancyDisplay {
             shareToAll: true
         });
         LogUtility.log('You shared your card with everyone.')
+        ui.notifications.info(game.i18n.localize(MODULE_L18N_PREFIX + ".notification.sharedWithAll")); // "Shared with all players."
     }
 
     _adjustToGlintColor (color) {

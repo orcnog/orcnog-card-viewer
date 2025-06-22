@@ -40,6 +40,7 @@
   "ORCNOG_CARD_VIEWER.notification.cardIdNotProvided": "Please provide a card name or ID.",
   "ORCNOG_CARD_VIEWER.notification.cardNotFound": "No card by that ID or name was found.",
   "ORCNOG_CARD_VIEWER.notification.pileNotFoundWillCreate": "No pile found by the name \"{pileName}\". Creating a new discard pile by that name.",
+  "ORCNOG_CARD_VIEWER.notification.sharedWithAll": "Shared with all players.",
   "ORCNOG_CARD_VIEWER.ui.showToPlayersButtonLabel": "Show to Players",
   "ORCNOG_CARD_VIEWER.ui.discardPileLabel": "Discard Pile",
   "ORCNOG_CARD_VIEWER.ui.ignoreWordsInDeckNameForDiscardPileMatch": "the, thy, a, an, in, on, of, for, de, le, la, el, los, las, deck, cards, card",
