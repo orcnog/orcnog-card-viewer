@@ -48,6 +48,6 @@
   ],
   "socket": true,
   "url": "https://github.com/orcnog/orcnog-card-viewer/",
-  "manifest": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.4.0/module.json",
+  "manifest": "https://raw.githubusercontent.com/orcnog/orcnog-card-viewer/master/dist/module.json",
   "download": "https://github.com/orcnog/orcnog-card-viewer/releases/download/v0.4.0/orcnog-card-viewer-v0.4.0.zip"
 }
