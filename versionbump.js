@@ -4,12 +4,19 @@ const readlineSync = require('readline-sync');
 const path = require('path');
 require('dotenv').config({ path: '.env.local' });
 
+// Helper to get required env variable or throw
+function getEnv(key) {
+  const value = process.env[key];
+  if (!value) throw new Error(`Missing required environment variable: ${key}`);
+  return value;
+}
+
 // Read paths from .env.local (no fallback)
-const moduleJsonPath = process.env.MODULE_JSON_PATH;
-const packageJsonPath = process.env.PACKAGE_JSON_PATH;
-const distPath = process.env.DIST_PATH;
-const releasesPath = process.env.RELEASES_PATH;
-const readmePath = process.env.README_PATH;
+const moduleJsonPath = getEnv('MODULE_JSON_PATH');
+const packageJsonPath = getEnv('PACKAGE_JSON_PATH');
+const distPath = getEnv('DIST_PATH');
+const releasesPath = getEnv('RELEASES_PATH');
+const readmePath = getEnv('README_PATH');
 
 // Read and parse the module.json file
 const moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath, 'utf8'));
@@ -66,10 +73,17 @@ archive.finalize();
 output.on('close', () => {
   console.log(`${path.join(outputDir, zipFileName)} created successfully!`);
 
-  // Update the README.md file with the release notes (if provided)
+  // Prompt before updating the README.md file with the release notes (if provided)
   if (releaseNotes !== '') {
-    fs.appendFileSync(readmePath, `\n\n## v${newVersion}\n${releaseNotes}`);
-    console.log(`${readmePath} updated successfully with release notes!`);
+    const updateReadme = readlineSync.keyInYNStrict(
+      `\x1b[33mDo you want to append these release notes to ${readmePath}?\x1b[0m`
+    );
+    if (updateReadme) {
+      fs.appendFileSync(readmePath, `\n\n## v${newVersion}\n${releaseNotes}`);
+      console.log(`${readmePath} updated successfully with release notes!`);
+    } else {
+      console.log('Skipped updating README.md with release notes.');
+    }
   }
 });
 
