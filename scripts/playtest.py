@@ -5,7 +5,8 @@ import time
 import argparse
 from dotenv import load_dotenv
 load_dotenv(dotenv_path='.env.local')
-
+import sys
+print("sys.argv:", sys.argv)
 def make_archive_without_excluded_folder(source_folder, archive_name, exclude_folder=None):
     """Create a zip archive excluding a specific folder."""
     with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as archive:
@@ -29,6 +30,8 @@ try:
     parser.add_argument("--no-packs", action="store_true", help="Skip copying the 'packs' folder (useful if your game is running and packs are LOCKED)")
     parser.add_argument("--server", type=str, help="Specify the server version (e.g., v12.343)")
     args = parser.parse_args()
+
+    print(args)
 
     # Get the current folder and module name
     current_folder = os.path.dirname(os.path.abspath(__file__))

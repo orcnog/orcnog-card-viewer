@@ -5,10 +5,7 @@
   "main": "dist/init.js",
   "scripts": {
     "lint": "eslint . --ext .js",
-    "lint-css": "stylelint 'dist/**/*.css' --fix",
-    "test": "python playtest.py",
-    "ver": "node versionbump.js",
-    "compile:macros": "node scripts/compile-macros.js"
+    "lint-css": "stylelint 'dist/**/*.css' --fix"
   },
   "repository": {
     "type": "git",
