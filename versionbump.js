@@ -2,14 +2,24 @@ const archiver = require('archiver');
 const fs = require('fs');
 const readlineSync = require('readline-sync');
 const path = require('path');
+require('dotenv').config({ path: '.env.local' });
 
-// Read the module.json file
-const moduleJsonPath = 'dist/module.json';
+// Read paths from .env.local (no fallback)
+const moduleJsonPath = process.env.MODULE_JSON_PATH;
+const packageJsonPath = process.env.PACKAGE_JSON_PATH;
+const distPath = process.env.DIST_PATH;
+const releasesPath = process.env.RELEASES_PATH;
+const readmePath = process.env.README_PATH;
+
+// Read and parse the module.json file
 const moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath, 'utf8'));
 
-// Read the package.json file
-const packageJsonPath = 'package.json';
+// Read and parse the package.json file
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+// Get the current module ID from module.json
+const moduleId = moduleJson.id;
+console.log(`Module ID: ${moduleId}`);
 
 // Get the current version from module.json
 const currentVersion = moduleJson.version;
@@ -24,41 +34,40 @@ console.log(`Release received - Release Notes: ${releaseNotes}`);
 // Update the version number in module.json
 const updatedModuleJson = JSON.stringify(moduleJson, null, 2).replace(new RegExp(currentVersion, 'g'), newVersion);
 fs.writeFileSync(moduleJsonPath, updatedModuleJson);
-console.log(`dist/module.json updated successfully!`);
+console.log(`${moduleJsonPath} updated successfully!`);
 
 // Update the version number in package.json
 packageJson.version = newVersion;
 fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-console.log(`package.json updated successfully!`);
+console.log(`${packageJsonPath} updated successfully!`);
 
-const outputDir = './releases';
-const zipFileName = `orcnog-card-viewer-v${newVersion}.zip`;
+const zipFileName = `${moduleId}-v${newVersion}.zip`;
+const outputDir = releasesPath;
 
-// Copy the updated module.json to the zip_releases folder
-const updatedModuleJsonPath = path.join(outputDir, 'module.json');
-fs.copyFileSync(moduleJsonPath, updatedModuleJsonPath);
-console.log(`Updated module.json copied to ${updatedModuleJsonPath}`);
+// Ensure releases directory exists
+if (!fs.existsSync(outputDir)){
+    fs.mkdirSync(outputDir, { recursive: true });
+}
 
 // Create a new output stream for the zip file
-const output = fs.createWriteStream(`${outputDir}/${zipFileName}`);
+const output = fs.createWriteStream(path.join(outputDir, zipFileName));
 const archive = archiver('zip');
 
 // Pipe the output stream to the archive
 archive.pipe(output);
 
 // Append the entire "dist" folder to the archive
-archive.directory('dist/', false);
+archive.directory(distPath, false);
 
 // Finalize the archive and close the output stream
 archive.finalize();
 
 // Listen for the "close" event to know when the archive has been created
 output.on('close', () => {
-  console.log(`./${outputDir}/${zipFileName} created successfully!`);
+  console.log(`${path.join(outputDir, zipFileName)} created successfully!`);
 
   // Update the README.md file with the release notes (if provided)
   if (releaseNotes !== '') {
-    const readmePath = 'README.md';
     fs.appendFileSync(readmePath, `\n\n## v${newVersion}\n${releaseNotes}`);
     console.log(`${readmePath} updated successfully with release notes!`);
   }

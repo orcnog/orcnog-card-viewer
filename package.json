@@ -27,6 +27,7 @@
   "homepage": "https://github.com/orcnog/orcnog-card-viewer#readme",
   "devDependencies": {
     "archiver": "^5.3.1",
+    "dotenv": "^16.5.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
