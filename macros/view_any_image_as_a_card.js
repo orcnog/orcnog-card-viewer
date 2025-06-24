@@ -15,6 +15,11 @@ let borderColor = '#543'; // optional
 let borderWidth = '5px'; // optional
 let shareToAll = true; // optional
 
+if (!game.modules.get("orcnog-card-viewer")?.active) {
+    ui.notifications.warn('Card Viewer module not found.');
+    return;
+}
+
 OrcnogFancyDisplay({
    front: img,
    back: backImg,

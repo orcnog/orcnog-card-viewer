@@ -1,5 +1,5 @@
-2025/06/22-18:21:19.090 6270 Delete type=3 #1
-2025/06/22-18:21:19.181 8648 Level-0 table #5: started
-2025/06/22-18:21:19.248 8648 Level-0 table #5: 3650 bytes OK
-2025/06/22-18:21:19.311 8648 Delete type=0 #3
-2025/06/22-18:21:19.311 8648 Manual compaction at level-0 from '!macros!Ea6tQ8SrBBM5WySQ' @ 72057594037927935 : 1 .. '!macros!t3MFBO2W3edfAb86' @ 0 : 0; will stop at (end)
+2025/06/23-17:47:45.017 acd4 Delete type=3 #1
+2025/06/23-17:47:45.087 8de0 Level-0 table #5: started
+2025/06/23-17:47:45.145 8de0 Level-0 table #5: 3998 bytes OK
+2025/06/23-17:47:45.227 8de0 Delete type=0 #3
+2025/06/23-17:47:45.228 8de0 Manual compaction at level-0 from '!macros!SpCH3mmUYGdHKB0q' @ 72057594037927935 : 1 .. '!macros!t38ipu2KtT72ZbDb' @ 0 : 0; will stop at (end)
