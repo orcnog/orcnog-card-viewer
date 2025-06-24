@@ -15,6 +15,7 @@ def make_archive_without_excluded_folder(source_folder, archive_name, exclude_fo
 
     with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as archive:
         try:
+            print("Did we make it this far?")
             for root, dirs, files in os.walk(source_folder):
                 # Skip the excluded folder and its subdirectories if specified
                 if exclude_folder and exclude_folder in dirs:
