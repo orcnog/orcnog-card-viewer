@@ -15,6 +15,11 @@ let faceDown = true;
 let whisper = false;
 let share = false;
 
+if (!game.modules.get("orcnog-card-viewer")?.active) {
+    ui.notifications.warn('Card Viewer module not found.');
+    return;
+}
+
 OrcnogFancyCardDealer({
    deckName: deckName,
 }).view(card, faceDown, whisper, share);

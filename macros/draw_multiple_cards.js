@@ -14,6 +14,11 @@ let discardPile = 'My Discard Pile';
 let quantity = 5;
 let share = true;
 
+if (!game.modules.get("orcnog-card-viewer")?.active) {
+    ui.notifications.warn('Card Viewer module not found.');
+    return;
+}
+
 OrcnogFancyCardDealer({
    deckName: deckName ,
    discardPileName: discardPile
