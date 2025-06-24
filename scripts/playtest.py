@@ -8,8 +8,6 @@ load_dotenv(dotenv_path='.env.local')
 
 def make_archive_without_excluded_folder(source_folder, archive_name, exclude_folder=None):
     """Create a zip archive excluding a specific folder."""
-    os.makedirs(os.path.dirname(archive_name), exist_ok=True)  # Ensure parent dirs exist
-
     if args.verbose:
         print(f"About to create archive: {archive_name} from {source_folder}, excluding folder: {exclude_folder if exclude_folder else 'None'}")
 
