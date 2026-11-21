@@ -157,6 +157,9 @@ export default function registerHooks() {
     // View on card image click in a stack window
 
     Hooks.on('renderApplication', (app, $html, data) => {
+        // Only v1 deck sheets come through here. From Foundry 13 the deck sheets are ApplicationV2 (handled by
+        // the next hook) and reading the CardsConfig global logs a deprecation warning on every v1 window.
+        if (foundry.applications?.sheets?.CardDeckConfig) return;
         if (app instanceof CardsConfig !== true) return;
         _registerCardImgClickInDeck($html, data);
     });
