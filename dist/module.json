@@ -3,13 +3,16 @@
   "id": "orcnog-card-viewer",
   "title": "Card Viewer",
   "description": "",
-  "systems": [],
   "version": "0.4.1",
   "license": "https://github.com/orcnog/orcnog-card-viewer/blob/master/LICENSE",
   "readme": "https://github.com/orcnog/orcnog-card-viewer/blob/master/README.md",
   "bugs": "https://github.com/orcnog/orcnog-card-viewer/issues",
   "changelog": "https://github.com/orcnog/orcnog-card-viewer/blob/master/README.md",
-  "author": "orcnog",
+  "authors": [
+    {
+      "name": "orcnog"
+    }
+  ],
   "compatibility": {
     "minimum": "10",
     "verified": "13"
